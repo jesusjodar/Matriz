@@ -38,13 +38,27 @@ enum MatrizColor {
                      0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s)
     }
     static func rgb(_ c: SIMD3<Float>) -> SIMD3<Float> {
-        let a = c.x + 0.3963377774 * c.y + 0.2158037573 * c.z
-        let b = c.x - 0.1055613458 * c.y - 0.0638541728 * c.z
-        let d = c.x - 0.0894841775 * c.y - 1.291485548 * c.z
-        let l = a*a*a, m = b*b*b, s = d*d*d
-        return simd_clamp(SIMD3(4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
-                               -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
-                               -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s), .zero, SIMD3(repeating: 1))
+        func convert(_ scale: Float) -> SIMD3<Float> {
+            let a = c.x + (0.3963377774 * c.y + 0.2158037573 * c.z) * scale
+            let b = c.x - (0.1055613458 * c.y + 0.0638541728 * c.z) * scale
+            let d = c.x - (0.0894841775 * c.y + 1.291485548 * c.z) * scale
+            let l = a*a*a, m = b*b*b, s = d*d*d
+            return SIMD3(4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+                         -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+                         -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s)
+        }
+        func inGamut(_ rgb: SIMD3<Float>) -> Bool {
+            min(rgb.x, min(rgb.y, rgb.z)) >= -0.00001 && max(rgb.x, max(rgb.y, rgb.z)) <= 1.00001
+        }
+        let original = convert(1)
+        if inGamut(original) { return simd_clamp(original, .zero, SIMD3(repeating: 1)) }
+        // Reducir croma en OKLab evita cambiar el matiz al saturar o mezclar portadas.
+        var low: Float = 0, high: Float = 1
+        for _ in 0..<10 {
+            let middle = (low + high) * 0.5
+            if inGamut(convert(middle)) { low = middle } else { high = middle }
+        }
+        return simd_clamp(convert(low), .zero, SIMD3(repeating: 1))
     }
     static func extract(_ data: Data) -> [SIMD3<Float>]? {
         guard data.count <= maximumBytes,
@@ -65,31 +79,31 @@ enum MatrizColor {
                 bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue) else { return nil }
             context.draw(image, in: CGRect(x: 0, y: 0, width: 64, height: 64))
             let p = bytes.bindMemory(to: UInt8.self)
-            var weights = [Float](repeating: 0, count: 72)
-            var sums = [SIMD3<Float>](repeating: .zero, count: 72)
+            var weights = [Float](repeating: 0, count: 125)
+            var sums = [SIMD3<Float>](repeating: .zero, count: 125)
             for i in stride(from: 0, to: p.count, by: 4) {
                 let alpha = Float(p[i + 3]) / 255
                 if alpha < 0.8 { continue }
                 let c = SIMD3(Float(p[i]), Float(p[i + 1]), Float(p[i + 2])) / (255 * alpha)
-                let high = max(c.x, max(c.y, c.z)), low = min(c.x, min(c.y, c.z))
-                let saturation = high - low
-                if high < 0.12 || low > 0.88 || saturation < 0.12 { continue }
                 let linear = SIMD3(Self.linear(c.x), Self.linear(c.y), Self.linear(c.z))
                 let lab = Self.lab(linear)
                 let angle = atan2(lab.z, lab.y) + .pi
                 let hue = min(23, max(0, Int(angle / (2 * .pi) * 24)))
-                let bucket = hue * 3 + min(2, max(0, Int(lab.x * 3)))
-                let weight = saturation * saturation * alpha
+                let lightness = min(4, max(0, Int(lab.x * 5)))
+                let chroma = simd_length(SIMD2(lab.y, lab.z))
+                let bucket = chroma < 0.035 ? 120 + lightness : hue * 5 + lightness
+                // La superficie conserva negros, blancos y pasteles; el croma ayuda a rescatar acentos.
+                let weight = alpha * (1 + min(chroma, 0.3) * 2)
                 weights[bucket] += weight
                 sums[bucket] += linear * weight
             }
-            let minimumWeight = max(2, weights.reduce(0, +) * 0.02)
+            let minimumWeight = max(1, weights.reduce(0, +) * 0.005)
             let ranked = weights.indices.sorted { weights[$0] == weights[$1] ? $0 < $1 : weights[$0] > weights[$1] }
             var colors: [SIMD3<Float>] = []
             for bucket in ranked where weights[bucket] > minimumWeight {
                 let color = sums[bucket] / weights[bucket]
                 // Nearby hue buckets should not occupy several slots with almost the same tone.
-                if colors.allSatisfy({ simd_distance(Self.lab($0), Self.lab(color)) >= 0.12 }) { colors.append(color) }
+                if colors.allSatisfy({ simd_distance(Self.lab($0), Self.lab(color)) >= 0.085 }) { colors.append(color) }
                 if colors.count == 4 { break }
             }
             return colors.isEmpty ? nil : colors

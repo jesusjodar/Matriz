@@ -16,7 +16,8 @@ struct MatrizSettings: Equatable {
     var waveOpacity = 1.0
     var sparkleOpacity = 1.0
     var waveSizeInfluence = 1.0
-    var depthConcavity = 0.0
+    var depthConcavity = 0.75
+    var shadowLight = 0.32
     var deformation = 4.0
     var backgroundStyle = 1
     var wavePosition = 0.0
@@ -25,18 +26,21 @@ struct MatrizSettings: Equatable {
     var orbSize = 1.0
     var sparkleShape = 0
     var paletteRichness = 1.0
+    var colorBlur = 0.5
     var saturation = 1.0
     var colorContrast = 1.0
     var customDeep = SIMD3<Double>(0.018, 0.035, 0.13)
     var customLight = SIMD3<Double>(0.10, 0.24, 0.68)
     var customSoft = SIMD3<Double>(0.24, 0.15, 0.55)
     var customAccent = SIMD3<Double>(0.025, 0.48, 0.63)
+    var agentEnabled = false
+    var agentSource = "all"
     var audioEnabled = true
     var audioSensitivity = 0.3258231026785712
     var audioIntensity = 0.6976422991071428
     var audioResponse = 0.09794224330357143
     var artworkEnabled = true
-    var artworkIntensity = 2.0
+    var artworkIntensity = 1.0
     var artworkTransition = 3.0
     var artworkColors = 4
 
@@ -58,9 +62,10 @@ struct MatrizSettings: Equatable {
         waveOpacity = number("waveOpacity", 1, 0...1)
         sparkleOpacity = number("sparkleOpacity", 1, 0...1)
         waveSizeInfluence = number("waveSizeInfluence", 1, 0...3)
+        shadowLight = number("shadowLight", 0.32, 0...0.8)
         let currentFormat = (values["settingsVersion"] as? Int ?? 0) >= 2
-        depthConcavity = currentFormat ? number("depthConcavity", 0, 0...1)
-            : (boolean("depthConcavityEnabled") ? number("depthConcavity", 0.5, 0...1) : 0)
+        depthConcavity = currentFormat ? number("depthConcavity", 0.75, 0...1)
+            : (values["depthConcavityEnabled"] == nil ? 0.75 : (boolean("depthConcavityEnabled") ? number("depthConcavity", 0.5, 0...1) : 0))
         deformation = number("deformation", 4, 0...4)
         backgroundStyle = Int(number("backgroundStyle", 1, 0...5).rounded())
         wavePosition = number("wavePosition", 0, -0.35...0.35)
@@ -68,6 +73,7 @@ struct MatrizSettings: Equatable {
         orbY = number("orbY", 0, -0.5...0.5)
         orbSize = number("orbSize", 1, 0.2...6)
         sparkleShape = Int(number("sparkleShape", 0, 0...2).rounded())
+        colorBlur = number("colorBlur", 0.5, 0...1)
         paletteRichness = number("paletteRichness", 1, 0...1)
         saturation = number("saturation", 1, 0...2)
         colorContrast = number("colorContrast", 1, 0.5...2)
@@ -75,12 +81,14 @@ struct MatrizSettings: Equatable {
         customLight = color("customLight", customLight)
         customSoft = color("customSoft", customSoft)
         customAccent = color("customAccent", customAccent)
+        agentEnabled = boolean("agentEnabled")
+        if let source = values["agentSource"] as? String, (["all"] + MatrizAgentBridge.agents).contains(source) { agentSource = source }
         audioEnabled = boolean("audioEnabled", true)
         audioSensitivity = number("audioSensitivity", 0.3258231026785712, -12...18)
         audioIntensity = number("audioIntensity", 0.6976422991071428, 0...1)
         audioResponse = number("audioResponse", 0.09794224330357143, 0...1)
         artworkEnabled = boolean("artworkEnabled", true)
-        artworkIntensity = currentFormat ? number("artworkIntensity", 2, 0...2) : 1
+        artworkIntensity = currentFormat ? number("artworkIntensity", 1, 0...2) : 1
         artworkTransition = number("artworkTransition", 3, 1...8)
         artworkColors = Int(number("artworkColors", 4, 1...4).rounded())
         speed = number("speed", 1.50166015625, 0.25...2)
@@ -98,13 +106,14 @@ struct MatrizSettings: Equatable {
     var values: [String: Any] {
         ["settingsVersion": 2, "speed": speed, "brightness": brightness, "contrast": contrast, "palette": palette, "hue": hue,
          "spacing": spacing, "size": size, "volumeScale": volumeScale, "quality": quality, "concavity": concavity,
+         "agentEnabled": agentEnabled, "agentSource": agentSource,
          "audioEnabled": audioEnabled, "audioSensitivity": audioSensitivity, "audioIntensity": audioIntensity,
          "audioResponse": audioResponse, "artworkEnabled": artworkEnabled,
          "artworkIntensity": artworkIntensity, "artworkTransition": artworkTransition, "artworkColors": artworkColors,
                       "waveOpacity": waveOpacity, "sparkleOpacity": sparkleOpacity, "waveSizeInfluence": waveSizeInfluence,
-                      "depthConcavity": depthConcavity,
+                      "depthConcavity": depthConcavity, "shadowLight": shadowLight,
                       "deformation": deformation, "backgroundStyle": backgroundStyle, "wavePosition": wavePosition, "orbX": orbX, "orbY": orbY, "orbSize": orbSize,
-                      "sparkleShape": sparkleShape, "paletteRichness": paletteRichness,
+                      "sparkleShape": sparkleShape, "paletteRichness": paletteRichness, "colorBlur": colorBlur,
                       "saturation": saturation, "colorContrast": colorContrast,
                       "customDeep": [customDeep.x, customDeep.y, customDeep.z],
                       "customLight": [customLight.x, customLight.y, customLight.z],

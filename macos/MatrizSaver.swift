@@ -29,14 +29,17 @@ final class MatrizSaverView: ScreenSaverView {
 
     override var configureSheet: NSWindow? {
         if settingsWindow == nil {
-            let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 620, height: 720),
+            let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 760, height: 800),
                                   styleMask: [.titled], backing: .buffered, defer: false)
             window.title = L("Matriz Settings")
+            window.backgroundColor = .black
+            window.appearance = NSAppearance(named: .darkAqua)
+            window.titlebarAppearsTransparent = true
             window.contentView = NSHostingView(rootView: MatrizSettingsPanel(done: { [weak window] in
                 guard let window else { return }
                 window.sheetParent?.endSheet(window)
                 window.orderOut(nil)
-            }).frame(width: 620, height: 720))
+            }).frame(width: 760, height: 800))
             settingsWindow = window
         }
         return settingsWindow

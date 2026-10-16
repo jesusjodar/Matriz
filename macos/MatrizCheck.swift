@@ -46,6 +46,8 @@ enum MatrizCheck {
         saved.waveOpacity = 0.4
         saved.sparkleOpacity = 0.6
         saved.waveSizeInfluence = 2.3
+        saved.colorBlur = 0.7
+        saved.shadowLight = 0.6
         saved.depthConcavity = 0.7
         saved.deformation = 3.2
         saved.backgroundStyle = 4
@@ -88,7 +90,7 @@ enum MatrizCheck {
                           && newSettings.audioIntensity == 1)
         precondition(newSettings.audioResponse == 0 && newSettings.artworkEnabled)
         precondition(newSettings.artworkIntensity == 1 && newSettings.artworkTransition == 1)
-        precondition(MatrizSettings(["settingsVersion": 2, "artworkIntensity": Double.infinity]).artworkIntensity == 2,
+        precondition(MatrizSettings(["settingsVersion": 2, "artworkIntensity": Double.infinity]).artworkIntensity == 1,
                      "El valor nuevo por defecto de la intensidad de portada no se aplica.")
         precondition(MatrizSettings(["palette": 4]).audioEnabled && MatrizSettings(["palette": 4]).artworkEnabled)
         let appearance = MatrizSettings(["waveOpacity": -2, "sparkleOpacity": 9, "waveSizeInfluence": 9,
@@ -97,6 +99,8 @@ enum MatrizCheck {
             "vibrance": -4, "colorContrast": 9, "hdrEnabled": "true", "artworkColors": 99,
             "customDeep": [Double.nan, 0, 0], "customLight": [-1, 0.3, 9], "customSoft": [true, false, true]])
         precondition(appearance.waveOpacity == 0 && appearance.sparkleOpacity == 1 && appearance.waveSizeInfluence == 3)
+        precondition(MatrizSettings(["shadowLight": -1]).shadowLight == 0 && MatrizSettings(["shadowLight": 2]).shadowLight == 0.8)
+        precondition(MatrizSettings(["shadowLight": Double.nan]).shadowLight == 0.32)
         precondition(appearance.depthConcavity == 0 && appearance.deformation == 4)
         precondition(appearance.backgroundStyle == 5 && appearance.orbSize == 1 && appearance.sparkleShape == 0)
         precondition(MatrizSettings(["orbSize": -2, "deformation": 99]).orbSize == 0.2 && MatrizSettings(["deformation": 99]).deformation == 4)
@@ -106,6 +110,9 @@ enum MatrizCheck {
                      && appearance.customSoft == MatrizSettings().customSoft)
         precondition(MemoryLayout<MatrizUniforms>.offset(of: \.audio) == 96 && MemoryLayout<MatrizUniforms>.offset(of: \.color0) == 144)
         precondition(MemoryLayout<MatrizUniforms>.offset(of: \.layout) == 208)
+        precondition(MatrizSettings(["colorBlur": -1]).colorBlur == 0 && MatrizSettings(["colorBlur": 2]).colorBlur == 1)
+        precondition(MatrizSettings(["colorBlur": Double.nan]).colorBlur == 0.5)
+        precondition(MemoryLayout<MatrizUniforms>.offset(of: \.colorBlur) == 240)
         let migrated = MatrizSettings(["depthConcavityEnabled": true, "depthConcavity": 0.7, "hdrEnabled": true,
                                        "vibrance": 0.6, "paletteVariation": 1.5, "artworkIntensity": 0.35])
         precondition(migrated.depthConcavity == 0.7 && migrated.artworkIntensity == 1)
@@ -141,7 +148,7 @@ enum MatrizCheck {
         let a = MatrizClock.phase(1_000_000_000, rate: 0.5175)
         let b = MatrizClock.phase(1_000_000_000 + 1.0 / 60, rate: 0.5175)
         precondition(abs(Double(b - a) - 0.5175 / 60) < 0.00001, "Se pierde precisión a largo plazo.")
-        precondition(MemoryLayout<MatrizUniforms>.stride == 240, "Layout de uniforms incompatible con Metal.")
+        precondition(MemoryLayout<MatrizUniforms>.stride == 256, "Layout de uniforms incompatible con Metal.")
     }
 
     struct BatteryCase {
@@ -385,7 +392,7 @@ enum MatrizCheck {
                          && preferences.settings.audioIntensity == 0.42 && preferences.settings.audioResponse == 0.9)
             precondition(preferences.settings.artworkEnabled
                          && preferences.settings.artworkIntensity == 0.6 && preferences.settings.artworkTransition == 5)
-            precondition(preferences.settings.depthConcavity == 0.7
+            precondition(preferences.settings.depthConcavity == 0.7 && preferences.settings.colorBlur == 0.7
                          && preferences.settings.waveSizeInfluence == 2.3 && preferences.settings.artworkColors == 4
                          && preferences.settings.customDeep == SIMD3(0.2, 0.1, 0.3))
             precondition(preferences.settings.backgroundStyle == 4 && preferences.settings.orbSize == 2.7
@@ -413,6 +420,7 @@ enum MatrizCheck {
             try runDocs(app: app, folder: CommandLine.arguments[3])
             return
         }
+        try MatrizAgentCheck.run()
         MatrizMediaCheck.run()
         checkSettingsAndClock()
         try checkPreferences()
@@ -493,6 +501,74 @@ enum MatrizCheck {
             let i = (y * 1440 + x) * 4
             precondition(full[i + 3] == 255 && full[i + 2] > 0, "Hay un hueco fuera de la superficie.")
         }
+        // El color vuelve a seguir el relieve, con ruido suavizable.
+        var colorField = MatrizSettings()
+        colorField.backgroundStyle = 0; colorField.sparkleOpacity = 0
+        colorField.contrast = 0.5
+        let lowRelief = try frame(2, settings: colorField)
+        colorField.contrast = 1.5
+        let highRelief = try frame(2, settings: colorField)
+        var changedTones = 0
+        for i in stride(from: 0, to: lowRelief.count, by: 4 * 53) {
+            let a = SIMD3<Float>(Float(lowRelief[i]), Float(lowRelief[i+1]), Float(lowRelief[i+2]))
+            let b = SIMD3<Float>(Float(highRelief[i]), Float(highRelief[i+1]), Float(highRelief[i+2]))
+            let peakA = max(a.x, max(a.y, a.z)), peakB = max(b.x, max(b.y, b.z))
+            if min(peakA, peakB) > 30 {
+                if simd_length(a / peakA - b / peakB) > 0.055 { changedTones += 1 }
+            }
+        }
+        precondition(changedTones > 1000, "El color no sigue la profundidad de las ondas.")
+        colorField.contrast = 1
+        colorField.colorBlur = 0
+        let crispColors = try frame(2, settings: colorField)
+        colorField.colorBlur = 1
+        let blurredColors = try frame(2, settings: colorField)
+        func colorVariation(_ pixels: [UInt8]) -> Float {
+            var difference: Float = 0
+            for y in stride(from: 0, to: 900, by: 16) {
+                for x in stride(from: 0, to: 1432, by: 8) {
+                    let i = (y * 1440 + x) * 4, j = i + 8 * 4
+                    let a = SIMD3<Float>(Float(pixels[i]), Float(pixels[i+1]), Float(pixels[i+2]))
+                    let b = SIMD3<Float>(Float(pixels[j]), Float(pixels[j+1]), Float(pixels[j+2]))
+                    difference += simd_length(a / max(1, max(a.x, max(a.y,a.z))) - b / max(1, max(b.x, max(b.y,b.z))))
+                }
+            }
+            return difference
+        }
+        precondition(colorVariation(blurredColors) < colorVariation(crispColors) * 0.9,
+                     "El control de blur no suaviza las transiciones del color.")
+        colorField.contrast = 1
+        colorField.shadowLight = 0
+        let deepShadows = try frame(2, settings: colorField)
+        colorField.shadowLight = 0.8
+        let liftedShadows = try frame(2, settings: colorField)
+        precondition(zip(deepShadows, liftedShadows).reduce(0) { $0 + Int($1.1) - Int($1.0) } > 100000,
+                     "El nuevo control no levanta las sombras.")
+        var highlights = MatrizSettings()
+        highlights.backgroundStyle = 0; highlights.brightness = 2
+        highlights.saturation = 2; highlights.colorContrast = 2
+        let white = SIMD4<Float>(1, 1, 1, 1)
+        let whiteCover = MatrizArtworkColors(primary: white, secondary: white, tertiary: white, quaternary: white)
+        let protected = try frame(2, settings: highlights, audio: SIMD4(repeating: 1), artworkPalette: whiteCover)
+        precondition(stride(from: 0, to: protected.count, by: 4).allSatisfy {
+            max(protected[$0], max(protected[$0+1], protected[$0+2])) <= 248
+        }, "El brillo extremo recorta el color SDR.")
+        for style in 1...5 {
+            var composition = MatrizSettings()
+            composition.backgroundStyle = style; composition.sparkleOpacity = 0
+            let idle = try frame(2, settings: composition)
+            let bass = try frame(2, settings: composition, audio: SIMD4(1, 0, 0, 1))
+            let changedBoundary = stride(from: 0, to: idle.count, by: 4).filter {
+                (Int(idle[$0]) + Int(idle[$0+1]) + Int(idle[$0+2]) == 0)
+                != (Int(bass[$0]) + Int(bass[$0+1]) + Int(bass[$0+2]) == 0)
+            }.count
+            precondition(changedBoundary > 1000, "La música no cambia el contorno de la composición \(style).")
+            if style >= 4 {
+                let treble = try frame(2, settings: composition, audio: SIMD4(0, 0, 1, 1))
+                precondition(treble != idle && treble != bass, "Los agudos no dan al orbe una respuesta independiente.")
+            }
+        }
+        print("Shader: color ligado al relieve y ruido suavizable, sombras ajustables, altas luces protegidas y cinco contornos reactivos correctos.")
         let adjustments: [(String, WritableKeyPath<MatrizSettings, Double>, Double)] = [
             ("brillo", \.brightness, 0.4), ("contraste", \.contrast, 0.5),
             ("densidad", \.spacing, 16), ("tamaño", \.size, 1.4),
@@ -500,7 +576,7 @@ enum MatrizCheck {
             ("opacidad de onda", \.waveOpacity, 0), ("opacidad de destellos", \.sparkleOpacity, 0),
             ("tamaño por onda", \.waveSizeInfluence, 3), ("desplazamiento", \.deformation, 1),
             ("posición de la onda", \.wavePosition, 0.25),
-            ("cantidad de colores", \.paletteRichness, 0),
+            ("cantidad de colores", \.paletteRichness, 0), ("blur de color", \.colorBlur, 1),
             ("saturación", \.saturation, 0), ("contraste de color", \.colorContrast, 2)
         ]
         for (name, key, value) in adjustments {
@@ -654,6 +730,12 @@ enum MatrizCheck {
             let a = try frame(2, settings: extreme)
             let b = try frame(2 + 1.0/240, settings: extreme)
             precondition(zip(a,b).allSatisfy { abs(Int($0.0)-Int($0.1)) <= 28 }, "El desplazamiento ampliado recorta figuras o provoca saltos.")
+            extreme.contrast = 1.5
+            let loudA = try frame(2, settings: extreme, audio: SIMD4(repeating: 1))
+            let loudB = try frame(2 + 1.0/240, settings: extreme, audio: SIMD4(repeating: 1))
+            precondition(zip(loudA,loudB).allSatisfy { abs(Int($0.0)-Int($0.1)) <= 28 },
+                         "El arrastre musical extremo recorta figuras o provoca saltos.")
+            extreme.contrast = 1
             extreme.deformation = 1
             let smaller = try frame(2, settings: extreme)
             precondition(a != smaller, "El nuevo rango de desplazamiento no cambia el resultado.")

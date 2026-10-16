@@ -1,0 +1,13 @@
+{
+  "description": "Matriz: local state colors, observation only",
+  "hooks": {
+    "SessionStart": [{"hooks": [{"type": "command", "command": __CODEX_COMMAND__, "timeout": 2}]}],
+    "UserPromptSubmit": [{"hooks": [{"type": "command", "command": __CODEX_COMMAND__, "timeout": 2}]}],
+    "PreToolUse": [{"hooks": [{"type": "command", "command": __CODEX_COMMAND__, "timeout": 2}]}],
+    "PermissionRequest": [{"hooks": [{"type": "command", "command": __CODEX_COMMAND__, "timeout": 2}]}],
+    "PostToolUse": [{"hooks": [{"type": "command", "command": __CODEX_COMMAND__, "timeout": 2}]}],
+    "Stop": [{"hooks": [{"type": "command", "command": __CODEX_COMMAND__, "timeout": 2}]}],
+    "Interrupt": [{"hooks": [{"type": "command", "command": __CODEX_COMMAND__, "timeout": 2}]}],
+    "SessionEnd": [{"hooks": [{"type": "command", "command": __CODEX_COMMAND__, "timeout": 2}]}]
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "SessionStart": [{"hooks": [{"type": "command", "command": __CLAUDE_COMMAND__, "timeout": 2}]}],
+    "UserPromptSubmit": [{"hooks": [{"type": "command", "command": __CLAUDE_COMMAND__, "timeout": 2}]}],
+    "PreToolUse": [{"hooks": [{"type": "command", "command": __CLAUDE_COMMAND__, "timeout": 2}]}],
+    "PermissionRequest": [{"hooks": [{"type": "command", "command": __CLAUDE_COMMAND__, "timeout": 2}]}],
+    "PostToolUse": [{"hooks": [{"type": "command", "command": __CLAUDE_COMMAND__, "timeout": 2}]}],
+    "PostToolUseFailure": [{"hooks": [{"type": "command", "command": __CLAUDE_COMMAND__, "timeout": 2}]}],
+    "Notification": [{"matcher": "permission_prompt|idle_prompt|elicitation_dialog", "hooks": [{"type": "command", "command": __CLAUDE_COMMAND__, "timeout": 2}]}],
+    "Stop": [{"hooks": [{"type": "command", "command": __CLAUDE_COMMAND__, "timeout": 2}]}],
+    "StopFailure": [{"hooks": [{"type": "command", "command": __CLAUDE_COMMAND__, "timeout": 2}]}],
+    "SessionEnd": [{"hooks": [{"type": "command", "command": __CLAUDE_COMMAND__, "timeout": 2}]}]
+  }
+}

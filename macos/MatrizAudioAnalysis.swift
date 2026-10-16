@@ -16,6 +16,7 @@ final class MatrizAudioAnalysis {
     private var lastSamples = -Double.infinity
     private var lastTick: Double?
     private var reference: Float = 0.08
+    private var bandReference = SIMD3<Float>(repeating: 0.04)
     private var target = SIMD4<Float>.zero
     private(set) var value = SIMD4<Float>.zero
     private var gateOpen = false
@@ -85,8 +86,17 @@ final class MatrizAudioAnalysis {
                 let gain = Float(pow(10, sensitivity / 20)) / max(reference, 0.0126)
                 let total = max(bands.x + bands.y + bands.z, 0.000001)
                 let strength = gateOpen ? min(1, rms * gain * 0.9) : 0
-                target = SIMD4(sqrt(bands.x / total) * strength, sqrt(bands.y / total) * strength,
-                               sqrt(bands.z / total) * strength, strength)
+                // Referencias independientes: un bajo fuerte no silencia los detalles agudos.
+                var responseBands = SIMD3<Float>.zero
+                for index in 0..<3 {
+                    let bandRMS = sqrt(bands[index] / total) * rms
+                    let bandTarget = max(0.009, bandRMS)
+                    let tau = bandTarget > bandReference[index] ? 0.4 : 6.0
+                    bandReference[index] += (bandTarget - bandReference[index]) * Float(1 - exp(-dt / tau))
+                    responseBands[index] = gateOpen ? min(1, bandRMS * Float(pow(10, sensitivity / 20))
+                        * (index == 1 ? 0.85 : 1.05) / max(0.009, bandReference[index])) : 0
+                }
+                target = SIMD4(responseBands.x, responseBands.y, responseBands.z, strength)
             }
         }
         if now - lastSamples > 0.2 { target = .zero; gateOpen = false; filled = 0 }

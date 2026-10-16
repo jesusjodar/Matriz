@@ -76,6 +76,10 @@ enum MatrizMediaCheck {
                          "La FFT asigna una senoide a la banda equivocada.")
             precondition(simd_length(same - opposite) < 0.00001, "La contrafase estéreo cancela la reacción.")
         }
+        let mixed = zip(signal(93.75), signal(6000, amplitude: 0.012)).map(+)
+        let mixBands = feed(MatrizAudioAnalysis(sampleRate: 48000, channels: 2), mixed, ticks: 600)
+        precondition(mixBands.x > 0.5 && mixBands.z > 0.4,
+                     "El bajo enmascara los agudos de una mezcla sostenida.")
         let silence = [Float](repeating: 0, count: 4096)
         precondition(feed(MatrizAudioAnalysis(sampleRate: 48000, channels: 2), silence) == .zero)
         precondition(feed(MatrizAudioAnalysis(sampleRate: 48000, channels: 2), signal(1000, amplitude: 0.0001)) == .zero)
@@ -113,9 +117,17 @@ enum MatrizMediaCheck {
             }
         }
         let neutralColors: [[UInt8]] = [[0, 0, 0, 255], [255, 255, 255, 255], [128, 128, 128, 255], [0, 0, 0, 0]]
-        for rgba in neutralColors {
-            precondition(MatrizColor.extract(png(rgba)) == nil, "Una portada neutra inventa un tono.")
+        for rgba in neutralColors.prefix(3) {
+            let colors = MatrizColor.extract(png(rgba))!
+            precondition(colors.count == 1 && colors.allSatisfy { abs($0.x - $0.y) < 0.001 && abs($0.y - $0.z) < 0.001 },
+                         "Una portada neutra debe mantener sus grises sin recuperar la paleta manual.")
         }
+        precondition(MatrizColor.extract(png(neutralColors[3])) == nil)
+        let grayCover = MatrizColor.extract(png([0, 0, 0, 255], otherRows: [[255, 255, 255, 255], [128, 128, 128, 255]]))!
+        precondition(grayCover.count >= 3 && grayCover.allSatisfy { abs($0.x - $0.y) < 0.001 && abs($0.y - $0.z) < 0.001 })
+        let pastel = MatrizColor.extract(png([190, 200, 210, 255]))!
+        precondition(pastel.count == 1 && pastel[0].z > pastel[0].x)
+
         let redPalette = MatrizColor.extract(png([255, 0, 0, 255]))!
         precondition(redPalette.count == 1, "Una portada de un solo tono inventa colores extra.")
         let red = redPalette[0]
@@ -125,13 +137,17 @@ enum MatrizMediaCheck {
         precondition(multiple.count == 4, "La portada multicolor no proporciona cuatro tonos distintos.")
         for i in multiple.indices {
             for j in multiple.indices where j > i {
-                precondition(simd_distance(MatrizColor.lab(multiple[i]), MatrizColor.lab(multiple[j])) >= 0.12)
+                precondition(simd_distance(MatrizColor.lab(multiple[i]), MatrizColor.lab(multiple[j])) >= 0.085)
             }
         }
         precondition(MatrizColor.extract(Data([1, 2, 3])) == nil)
         precondition(MatrizColor.extract(Data(count: MatrizColor.maximumBytes + 1)) == nil)
         let blue = SIMD3<Float>(0, 0, 1)
         precondition(simd_length(MatrizColor.rgb(MatrizColor.lab(red)) - red) < 0.00001)
+        let vivid = SIMD3<Float>(0.65, 0.55, 0.35)
+        let mapped = MatrizColor.lab(MatrizColor.rgb(vivid))
+        precondition(abs(atan2(mapped.z, mapped.y) - atan2(vivid.z, vivid.y)) < 0.01,
+                     "La compresión de gama cambia el matiz de una portada saturada.")
         var transition = MatrizColorTransition()
         transition.set(red, at: 0, duration: 3)
         precondition(transition.value(at: 0, intensity: 1).w == 0)

@@ -41,9 +41,9 @@ if (gl) {
   const waveY = gl.getUniformLocation(program, 'uWaveY')
   let renderPixelRatio = 0
   gl.uniform4f(gl.getUniformLocation(program, 'uAudio'), 0, 0, 0, 0)
-  gl.uniform4f(gl.getUniformLocation(program, 'uSurface'), 1, 1, 1, 0)
+  gl.uniform4f(gl.getUniformLocation(program, 'uSurface'), 1, 1, 1, 0.75)
   gl.uniform4f(gl.getUniformLocation(program, 'uLayout'), 1, 1, 0, 0)
-  gl.uniform4f(gl.getUniformLocation(program, 'uOrb'), 0, 0, 0, 0)
+  gl.uniform4f(gl.getUniformLocation(program, 'uOrb'), 0, 0, 0.32, 0)
   gl.uniform2f(gl.getUniformLocation(program, 'uStyle'), 4, 1)
   gl.uniform2f(gl.getUniformLocation(program, 'uGrade'), 1, 1)
   for (const [name, value] of Object.entries({
@@ -54,7 +54,7 @@ if (gl) {
   // Los mismos valores iniciales que MatrizSettings en macOS.
   for (const [name, value] of Object.entries({
     uBrightness: 1, uContrast: 1, uSpacing: 8,
-    uSize: 1, uVolumeScale: 0.6, uConcavity: 0.78,
+    uColorBlur: 0.5, uSize: 1, uVolumeScale: 0.6, uConcavity: 0.78,
   })) gl.uniform1f(gl.getUniformLocation(program, name), value)
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
   let frame = 0

@@ -4,6 +4,8 @@ import SwiftUI
 // This inert state is shared with the saver; only MatrizApp installs services and actions.
 final class MatrizLiveState: ObservableObject {
     static let shared = MatrizLiveState()
+    @Published private(set) var agent: MatrizAgentEvent?
+    private var agentColor = MatrizColorTransition()
     @Published var desktopAvailable = false
     @Published var audioStatus = L("Audio is off")
     @Published var artworkStatus = L("Album colors are off")
@@ -42,6 +44,22 @@ final class MatrizLiveState: ObservableObject {
                             secondary: colors[1].displayValue(at: now, colorIntensity: tintIntensity),
                             tertiary: colors[2].displayValue(at: now, colorIntensity: tintIntensity),
                             quaternary: colors[3].displayValue(at: now, colorIntensity: tintIntensity))
+    }
+
+    func setAgent(_ event: MatrizAgentEvent?, at now: Double = ProcessInfo.processInfo.systemUptime) {
+        guard event != agent else { return }
+        if event?.state != agent?.state {
+            let color = event.map { event -> SIMD3<Float> in
+                let c = event.state.color
+                return SIMD3(MatrizColor.linear(c.x), MatrizColor.linear(c.y), MatrizColor.linear(c.z))
+            }
+            agentColor.set(color, at: now, duration: 0.6)
+        }
+        agent = event
+    }
+    func agentPalette(at now: Double) -> MatrizArtworkColors {
+        let color = agentColor.displayValue(at: now, colorIntensity: 1)
+        return MatrizArtworkColors(primary: color, secondary: color, tertiary: color, quaternary: color)
     }
 
     static var audioSupported: Bool {

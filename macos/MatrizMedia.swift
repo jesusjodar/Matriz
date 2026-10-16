@@ -3,6 +3,7 @@ import AppKit
 // One owner for the desktop app; neither MatrizView nor the saver creates capture services.
 final class MatrizMedia {
     private let live = MatrizLiveState.shared
+    private let agents = MatrizAgentService()
     private let artwork = MatrizArtworkService()
     private var audio: AnyObject?
     private var audioArmed = false
@@ -74,6 +75,7 @@ final class MatrizMedia {
         settings = MatrizPreferences.shared.settings
         live.configureArtwork(count: settings.artworkColors, intensity: Float(settings.artworkIntensity),
                               duration: settings.artworkTransition, at: ProcessInfo.processInfo.systemUptime)
+        agents.configure(active: canRun && settings.agentEnabled, source: settings.agentSource)
         if !settings.audioEnabled { audioArmed = false }
         audioActive = canRun && settings.audioEnabled && audioArmed
         artworkActive = canRun && settings.artworkEnabled
@@ -99,6 +101,7 @@ final class MatrizMedia {
         live.requestAudio = nil; live.requestArtwork = nil; live.consumersChanged = nil
         if #available(macOS 14.2, *), let service = audio as? MatrizAudioService { service.shutdown() }
         artwork.shutdown()
+        agents.shutdown()
         live.resetAudio()
         NotificationCenter.default.removeObserver(self)
         NSWorkspace.shared.notificationCenter.removeObserver(self)

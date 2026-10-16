@@ -11,7 +11,7 @@
 <p align="center">
   <img alt="macOS 14+" src="https://img.shields.io/badge/macOS-14%2B-1d1d1f?logo=apple&logoColor=white">
   <img alt="Apple Silicon" src="https://img.shields.io/badge/Apple_Silicon-arm64-4a90d9?logo=apple&logoColor=white">
-  <img alt="Versión 2.1.0" src="https://img.shields.io/badge/versi%C3%B3n-2.1.0-7a5cf0">
+  <img alt="Versión 2.2.0" src="https://img.shields.io/badge/versi%C3%B3n-2.2.0-7a5cf0">
   <img alt="Idiomas 20" src="https://img.shields.io/badge/idiomas-20-2ea44f">
 </p>
 
@@ -43,7 +43,7 @@ Matriz dibuja detrás de los iconos del escritorio, en todas las pantallas. Un c
 
 - **Fondo de escritorio animado.** Se coloca detrás de los iconos y del Finder, en todas tus pantallas, sin interferir con tu trabajo.
 - **Seis composiciones.** Desde la pantalla completa hasta orbes con bordes difuminados que pueden ocupar todo el monitor.
-- **Nueve paletas y color a medida.** Cuatro pigmentos que se entrelazan con interferencias suaves; también puedes elegir tus propios colores.
+- **Nueve paletas y color a medida.** Cuatro pigmentos ligados al relieve, con ruido orgánico y suavizado regulable; también puedes elegir tus propios colores.
 - **Destellos con carácter.** Estrellas, círculos o cuadrados; tamaño según la profundidad, concavidad ajustable y desplazamiento de hasta el 400 %.
 - **Música en color.** Con tu permiso, Matriz analiza el audio del sistema y toma la paleta de la portada de Música o Spotify, con transiciones interrumpibles.
 - **Salvapantallas incluido.** El mismo estilo visual cuando el Mac está inactivo, con los ajustes compartidos.
@@ -66,20 +66,20 @@ En **Destellos → Forma de las partículas** eliges estrellas, círculos o cuad
 
 ## El panel de ajustes
 
-Al abrir Matriz desde Finder aparece su panel, con controles nativos y ocho grupos plegables. Cada cambio se aplica al momento, también al salvapantallas, que comparte los mismos ajustes.
+Al abrir Matriz desde Finder aparece su panel, con fondo negro, navegación nativa Liquid Glass y seis pestañas. Cada cambio se aplica al momento, también al salvapantallas, que comparte los mismos ajustes.
 
 | Apariencia y color | Música y portadas |
 |:---:|:---:|
 | <img src="docs/images/panel-apariencia.png" width="340" alt="Panel de ajustes: Apariencia"> | <img src="docs/images/panel-musica.png" width="340" alt="Panel de ajustes: Música y portadas"> |
 
-- **Apariencia** — composición, posición de la onda y del orbe, paleta (o colores de portada), variedad de tonos, matiz, brillo, saturación, contraste, forma de las partículas, densidad, tamaño y opacidades.
-- **Movimiento** — ritmo, tamaño de las ondas y desplazamiento de las partículas.
-- **Comportamiento** — profundidad, tamaño según la profundidad y concavidad dinámica de las estrellas.
-- **Música** — reacción al audio del Mac (sensibilidad, intensidad, suavidad) y colores de portada.
-- **Pantalla de bloqueo** — cuándo pedir la contraseña, gestionado por macOS.
-- **Salvapantallas** — activación y estilo compartido con el fondo de escritorio.
-- **Rendimiento** — Ahorro de energía, Equilibrado o Máxima nitidez.
-- **Acerca de** — autor, enlaces y versión instalada.
+- **Apariencia** — composición, posición de ondas y orbes, paleta, variedad, suavizado del ruido de color, matiz, brillo, saturación y contraste.
+- **Partículas** — forma, densidad, tamaño, opacidades, profundidad, luz en sombras y cambios graduales de tamaño y concavidad: los destellos pequeños tienen curvas más profundas y los grandes, menos.
+- **Movimiento** — ritmo, tamaño de los volúmenes y desplazamiento, más contenido en sombras y con arrastre suave en las crestas.
+- **Música** — reacción al audio, sensibilidad, intensidad, suavidad y colores de portada. La saturación de portada parte del 100 % en ajustes nuevos.
+- **Agentes de IA** — paleta por estado y conectores para Codex, Claude Code, OpenCode, Hermes, LM Studio y otros agentes.
+- **General** — rendimiento, salvapantallas, bloqueo y acerca de.
+
+Las altas luces se comprimen con una curva suave antes de llegar al límite SDR. El color conserva sus proporciones y el tramado estable reduce las bandas de cuantización.
 
 Matriz también respeta **Reducir movimiento** de macOS, que deja una imagen fija, y el **modo de bajo consumo**, que fuerza el perfil de Ahorro. El botón **Restablecer…** solo afecta a Matriz.
 
@@ -87,7 +87,7 @@ Matriz también respeta **Reducir movimiento** de macOS, que deja una imagen fij
 
 ### Requisitos
 
-- macOS 14 Sonoma o posterior. La reacción al audio requiere macOS 14.2 o posterior.
+- macOS 14 Sonoma o posterior. La reacción al audio requiere macOS 14.2 o posterior; la extensión de Wallpaper, macOS 26 o posterior.
 - Mac con Apple Silicon. La release está compilada para arm64; en Macs Intel puedes [compilar desde el código fuente](#desarrollo).
 - No se necesita ninguna cuenta ni conexión permanente a internet.
 
@@ -96,11 +96,13 @@ Matriz también respeta **Reducir movimiento** de macOS, que deja una imagen fij
 Descarga el archivo desde la [página de releases](https://github.com/jesusjodar/Matriz/releases) y comprueba su integridad:
 
 ```sh
-curl -L -o Matriz-2.1.0.zip https://github.com/jesusjodar/Matriz/releases/download/v2.1.0/Matriz-2.1.0.zip
+curl --fail --location -o Matriz-2.2.0.zip https://github.com/jesusjodar/Matriz/releases/download/v2.2.0/Matriz-2.2.0.zip
 
-shasum -a 256 Matriz-2.1.0.zip
-# Debe mostrar:
-# 883bdb1695f9ea0579c712edf056ee69d79923b634cf4caa12698a195945f1c5
+curl --fail --location -o SHA256SUMS https://github.com/jesusjodar/Matriz/releases/download/v2.2.0/SHA256SUMS
+shasum -a 256 -c SHA256SUMS
+# Debe mostrar: Matriz-2.2.0.zip: OK
+# SHA-256:
+# 026a3d3df7bd808b000f59fbfddb00c0dd09fbf62bdc5383d824dd13facc762a
 ```
 
 ### Quitar la cuarentena de macOS
@@ -108,7 +110,7 @@ shasum -a 256 Matriz-2.1.0.zip
 Matriz está firmada localmente y no está notarizada por Apple, así que macOS marca la descarga como en cuarentena. Retírala con un comando antes de abrirla (si no, verás «no se puede abrir» o «está dañada»):
 
 ```sh
-unzip -q Matriz-2.1.0.zip
+unzip -q Matriz-2.2.0.zip
 xattr -dr com.apple.quarantine Matriz.app Matriz.saver
 ```
 
@@ -123,25 +125,17 @@ cp -R Matriz.saver "$HOME/Library/Screen Savers/"
 open ~/Applications/Matriz.app
 ```
 
-### Todo en un solo comando
+### Actualizar desde una versión anterior
 
-```sh
-curl -L -o Matriz-2.1.0.zip https://github.com/jesusjodar/Matriz/releases/download/v2.1.0/Matriz-2.1.0.zip \
-  && unzip -q Matriz-2.1.0.zip \
-  && xattr -dr com.apple.quarantine Matriz.app Matriz.saver \
-  && mkdir -p ~/Applications "$HOME/Library/Screen Savers" \
-  && cp -R Matriz.app ~/Applications/ \
-  && cp -R Matriz.saver "$HOME/Library/Screen Savers/" \
-  && open ~/Applications/Matriz.app
-```
+Consulta los [comandos completos de la versión 2.2.0](docs/releases/v2.2.0.md#instalar-o-actualizar-y-retirar-la-cuarentena): guardan los bundles anteriores como copia de seguridad antes de sustituirlos. Las preferencias existentes se conservan.
 
 ## Primeros pasos
 
 1. Abre Matriz: aparece un icono de destellos en la barra de menús y el fondo comienza a animarse detrás de los iconos del escritorio.
 2. Ve a **Ajustes…** en el menú de la barra de menús (o vuelve a abrir Matriz desde Finder) para elegir composición, paleta y movimiento.
-3. Elige Matriz como salvapantallas en **Ajustes del Sistema → Salvapantallas** si quieres el mismo estilo cuando el Mac esté inactivo.
+3. En macOS 26 o posterior, elige **Matriz** en **Ajustes del Sistema → Fondo de pantalla** para usar la extensión. Desde **Salvapantallas…** puedes elegirla también para el reposo; el módulo independiente sigue disponible entre los salvapantallas personalizados.
 
-Desde el menú de la barra de menús puedes **pausar la animación**, abrir los **ajustes**, abrir los **ajustes de salvapantallas**, consultar cómo funciona el **bloqueo** o **salir y retirar el fondo**. Al salir, reaparece tu fondo habitual sin modificar las preferencias del sistema.
+Desde el menú de la barra de menús puedes **pausar la animación**, abrir los **ajustes**, abrir los **ajustes de salvapantallas**, consultar cómo funciona el **bloqueo** o **salir y retirar el fondo**. Al salir, se retira la capa de escritorio. Si has elegido la extensión en Fondo de pantalla, macOS conserva esa selección.
 
 ## Música y portadas
 
@@ -155,7 +149,8 @@ Así funciona:
 
 - **Nada de micrófono.** Core Audio Taps analiza la salida predeterminada del sistema: graves, medios, agudos y energía. El audio no se graba, no se guarda y no se envía a ningún sitio.
 - **Los reproductores no se abren solos.** Cada dos segundos se comprueban los reproductores que ya estén abiertos y autorizados; si ambos suenan, se mantiene el seleccionado para evitar cambios continuos.
-- **Portadas locales.** De Música se lee la portada mediante Apple Events públicos; de Spotify solo se descarga la imagen por HTTPS. Los colores se extraen en tu Mac (hasta cuatro tonos dominantes, en OKLab) y nunca se guardan.
+- **Portadas locales.** De Música se lee la portada mediante Apple Events públicos; de Spotify solo se descarga la imagen por HTTPS. Los colores se extraen en tu Mac (hasta cuatro tonos representativos, incluidos blancos, negros, grises y pasteles, en OKLab) y nunca se guardan.
+- **Reacción por frecuencias.** Los graves expanden la altura de las ondas, el ancho de la franja central y el tamaño de los orbes. Los agudos modifican el contorno de los orbes y los detalles de las partículas; cada banda tiene su propia referencia de nivel.
 - **Transiciones suaves.** Al cambiar de canción o de reproductor, la paleta se funde desde el color visible, sin saltos. Si no hay portada o se detiene la reproducción, vuelve a tu paleta elegida.
 - **Se apaga cuando no hace falta.** La captura y las consultas se liberan al desactivar, pausar, dormir, bloquear o salir. Reducir movimiento suspende ambas funciones.
 
@@ -163,8 +158,11 @@ Nota: Música no garantiza portada en emisiones de streaming o radio, y los repr
 
 ## Salvapantallas y pantalla de bloqueo
 
-- **Salvapantallas:** selecciona Matriz en Ajustes del Sistema → Salvapantallas. Comparte tu apariencia y tu movimiento; las funciones de música y portadas solo están activas en la app de escritorio, mientras que el salvapantallas mantiene la paleta que elijas.
-- **Bloqueo:** para proteger la sesión, configura **Solicitar contraseña → Inmediatamente** en Pantalla de bloqueo. Matriz no modifica ajustes de seguridad; el formulario de contraseña, el inicio de sesión y FileVault los controla macOS.
+La app incluye una **extensión de Wallpaper** para ofrecer Matriz en **Ajustes del Sistema → Fondo de pantalla**, tanto para el escritorio como para el bloqueo y el salvapantallas del sistema. Usa el shader Metal original y recibe una copia de tus ajustes visuales. La selección del fondo del sistema persiste aunque cierres Matriz.
+
+El módulo independiente `Matriz.saver` sigue disponible y comparte las preferencias de apariencia. La música y las carátulas se procesan únicamente en la app de escritorio.
+
+La extensión utiliza interfaces privadas de `WallpaperExtensionKit`: una actualización de macOS puede exigir adaptaciones. No cambia contraseñas ni FileVault. Consulta la [guía de Wallpaper y bloqueo](docs/wallpaper-extension.md) y la [guía de agentes y sus fuentes oficiales](integrations/README.md).
 
 ## Rendimiento
 
@@ -189,7 +187,7 @@ Estas cifras describen el perfil de trabajo, no una garantía de cadencia para t
 No. Analiza la salida de audio del sistema con las API de captura de macOS, en memoria y sin conservar nada. Nunca enciende el micrófono.
 
 **¿Por qué al salir de la app vuelve mi fondo de siempre?**
-Matriz no modifica tu fondo del sistema: dibuja su propia capa animada delante de él mientras se ejecuta. Al salir, la capa desaparece y reaparece tu fondo habitual.
+La app dibuja una capa que desaparece al salir. Además puedes elegir su extensión como fondo del sistema: esa selección la conserva macOS hasta que elijas otro fondo.
 
 **¿Funciona en un Mac Intel?**
 La release está compilada para Apple Silicon. En Intel puedes compilar el proyecto desde el código fuente; solo necesita las herramientas de Xcode.
@@ -208,8 +206,8 @@ Es la cuarentena de Gatekeeper con las apps no notarizadas: ejecuta `xattr -dr c
 
 ## Desinstalación
 
-1. Sal de Matriz desde su menú de la barra de menús.
-2. Elimina los dos bundles instalados:
+1. Si elegiste la extensión, selecciona otro fondo en Ajustes del Sistema.
+2. Sal de Matriz y elimina los dos bundles instalados:
 
 ```sh
 rm -rf ~/Applications/Matriz.app "$HOME/Library/Screen Savers/Matriz.saver"
@@ -221,7 +219,7 @@ macOS puede conservar los permisos concedidos; revócalos en **Ajustes del Siste
 
 El proyecto combina una versión web de vista previa (Vite, TypeScript y WebGL2) con la app nativa (AppKit, SwiftUI y Metal). El shader GLSL es la única fuente visual: la versión Metal se genera a partir de él al compilar, de modo que web y app comparten ecuaciones.
 
-Requiere Node con npm y, para la parte nativa, macOS 14+ con herramientas de Xcode.
+Requiere Node con npm y herramientas de Xcode. La compilación completa y las comprobaciones de la extensión de Wallpaper requieren un SDK de macOS 26 o posterior y un sistema compatible.
 
 ```sh
 npm install          # dependencias de desarrollo
@@ -233,7 +231,7 @@ npm run macos:check  # verificación Metal completa + capturas de los estilos
 npm run macos:install # instala las compilaciones en tu sesión
 ```
 
-`macos:check` valida el renderizado real, el determinismo, los ajustes, las seis composiciones, las tres geometrías, el desplazamiento al 400 %, la comunicación entre procesos, el DSP y la extracción de color. Además guarda en `~/Library/Application Support/Matriz/Build/` las capturas `Matriz-style-N.png` de cada estilo y `Matriz-styles-preview.png` con el contacto de los seis.
+`macos:check` valida además el catálogo Wallpaper, el contexto remoto y la captura IOSurface. Comprueba el renderizado real, el determinismo, los ajustes, las seis composiciones, las tres geometrías, el desplazamiento al 400 %, la comunicación entre procesos, el DSP y la extracción de color. Además guarda en `~/Library/Application Support/Matriz/Build/` las capturas `Matriz-style-N.png` de cada estilo y `Matriz-styles-preview.png` con el contacto de los seis.
 
 Estructura:
 

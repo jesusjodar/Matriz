@@ -1,0 +1,30 @@
+# Merge this hooks block into ~/.hermes/config.yaml; retain the existing entries.
+# Hermes must authorize the hook commands normally; this file does not change its allowlist.
+hooks:
+  on_session_start:
+    - command: __HERMES_COMMAND__
+      timeout: 2
+  pre_llm_call:
+    - command: __HERMES_COMMAND__
+      timeout: 2
+  pre_tool_call:
+    - command: __HERMES_COMMAND__
+      timeout: 2
+  post_tool_call:
+    - command: __HERMES_COMMAND__
+      timeout: 2
+  post_llm_call:
+    - command: __HERMES_COMMAND__
+      timeout: 2
+  on_session_end:
+    - command: __HERMES_COMMAND__
+      timeout: 2
+  on_session_finalize:
+    - command: __HERMES_COMMAND__
+      timeout: 2
+  pre_approval_request:
+    - command: __HERMES_COMMAND__
+      timeout: 2
+  post_approval_response:
+    - command: __HERMES_COMMAND__
+      timeout: 2

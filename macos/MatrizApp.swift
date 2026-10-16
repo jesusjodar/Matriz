@@ -16,6 +16,7 @@ final class MatrizApp: NSObject, NSApplicationDelegate {
     private var sleeping = false
 
     static func main() {
+        if MatrizAgentBridge.handleCLI(Array(CommandLine.arguments.dropFirst())) { return }
         let app = NSApplication.shared
         let delegate = MatrizApp()
         app.delegate = delegate
@@ -49,9 +50,13 @@ final class MatrizApp: NSObject, NSApplicationDelegate {
         for name in [NSWorkspace.screensDidWakeNotification, NSWorkspace.sessionDidBecomeActiveNotification] {
             center.addObserver(self, selector: #selector(resume), name: name, object: nil)
         }
+        NotificationCenter.default.addObserver(self, selector: #selector(publishWallpaperSettings), name: MatrizPreferences.notification, object: nil)
+        publishWallpaperSettings()
         media = MatrizMedia()
         rebuildWindows()
     }
+
+    @objc private func publishWallpaperSettings() { MatrizWallpaperSettings.publish(MatrizPreferences.shared.settings) }
 
     @objc private func rebuildWindows() {
         let oldWindows = windows
@@ -105,10 +110,13 @@ final class MatrizApp: NSObject, NSApplicationDelegate {
 
     @objc private func openSettings() {
         if settingsWindow == nil {
-            let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 640, height: 760),
+            let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 760, height: 800),
                                   styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
             window.title = L("Matriz Settings")
-            window.minSize = NSSize(width: 580, height: 600)
+            window.backgroundColor = .black
+            window.appearance = NSAppearance(named: .darkAqua)
+            window.titlebarAppearsTransparent = true
+            window.minSize = NSSize(width: 680, height: 600)
             window.isReleasedWhenClosed = false
             window.contentView = NSHostingView(rootView: MatrizSettingsPanel())
             window.center()
@@ -125,7 +133,7 @@ final class MatrizApp: NSObject, NSApplicationDelegate {
     @objc private func showHelp() {
         let alert = NSAlert()
         alert.messageText = L("Matriz when your Mac is locked")
-        alert.informativeText = L("Choose Matriz in System Settings → Screen Saver. macOS manages password protection and sign-in separately. Quitting Matriz restores your usual wallpaper.")
+        alert.informativeText = L("Wallpaper extension: desktop and lock screen.") + "\n\n" + L("Choose Matriz in Wallpaper settings.") + "\n\n" + L("Private API: macOS updates may affect it.")
         alert.addButton(withTitle: L("OK"))
         alert.runModal()
     }

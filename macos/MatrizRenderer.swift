@@ -23,9 +23,11 @@ struct MatrizUniforms {
     var color3: SIMD4<Float>
     var layout: SIMD4<Float>
     var orb: SIMD4<Float> = .zero
+    var colorBlur: Float
 
     init(width: Int = 1, height: Int = 1, pixelRatio: Float = 1, time: Double = 0,
          settings: MatrizSettings, audio: SIMD4<Float> = .zero, artworkPalette: MatrizArtworkColors? = nil) {
+        colorBlur = Float(settings.colorBlur)
         brightness = Float(settings.brightness)
         contrast = Float(settings.contrast)
         spacing = Float(settings.spacing)
@@ -37,7 +39,7 @@ struct MatrizUniforms {
         style = SIMD2(Float(settings.deformation), Float(settings.paletteRichness))
         grade = SIMD2(Float(settings.saturation), Float(settings.colorContrast))
         layout = SIMD4(Float(settings.backgroundStyle), Float(settings.orbSize), Float(settings.sparkleShape), Float(settings.wavePosition))
-        orb = SIMD4(Float(settings.orbX), Float(settings.orbY), 0, 0)
+        orb = SIMD4(Float(settings.orbX), Float(settings.orbY), Float(settings.shadowLight), 0)
         let palette = MatrizColor.manualPalette(settings)
         color0 = palette.primary; color1 = palette.secondary
         color2 = palette.tertiary; color3 = palette.quaternary
@@ -111,7 +113,7 @@ final class MatrizRenderer: NSObject, MTKViewDelegate {
     deinit { NotificationCenter.default.removeObserver(self) }
     @objc private func settingsChanged() { template = MatrizUniforms(settings: MatrizPreferences.shared.settings) }
 
-    private func submit(texture: MTLTexture, uniforms: MatrizUniforms, drawable: CAMetalDrawable? = nil) throws -> MTLCommandBuffer {
+    func submit(texture: MTLTexture, uniforms: MatrizUniforms, drawable: CAMetalDrawable? = nil) throws -> MTLCommandBuffer {
         guard texture.pixelFormat == .rgba8Unorm, let command = queue.makeCommandBuffer() else {
             throw NSError(domain: "Matriz", code: 3, userInfo: [NSLocalizedDescriptionKey: "No se pudo crear el fotograma SDR."])
         }
@@ -143,7 +145,10 @@ final class MatrizRenderer: NSObject, MTKViewDelegate {
         uniforms.setFrame(width: drawable.texture.width, height: drawable.texture.height,
             pixelRatio: Float(view.drawableSize.width / max(view.bounds.width, 1)), time: MatrizClock.shared.time(),
             audio: live.desktopAvailable ? live.audio(at: now) : .zero)
-        if live.desktopAvailable { uniforms.replacePalette(live.artwork(at: now)) }
+        if live.desktopAvailable {
+            uniforms.replacePalette(live.artwork(at: now))
+            uniforms.replacePalette(live.agentPalette(at: now))
+        }
         do { _ = try submit(texture: drawable.texture, uniforms: uniforms, drawable: drawable) }
         catch { view.isPaused = true; NSLog("Matriz: %@", error.localizedDescription) }
     }

@@ -65,9 +65,10 @@ test('anima sin interacción, respeta movimiento reducido y pausa al ocultarse',
 
   assert.equal(frames.length, 1)
   for (const [name, value] of Object.entries({ uBrightness: 1, uContrast: 1,
-    uSpacing: 8, uSize: 1, uVolumeScale: 0.6, uConcavity: 0.78 })) assert.equal(uniforms[name], value)
+    uSpacing: 8, uColorBlur: 0.5, uSize: 1, uVolumeScale: 0.6, uConcavity: 0.78 })) assert.equal(uniforms[name], value)
   assert.deepEqual(uniforms.uAudio, [0, 0, 0, 0])
-  assert.deepEqual(uniforms.uSurface, [1, 1, 1, 0])
+  assert.deepEqual(uniforms.uSurface, [1, 1, 1, 0.75])
+  assert.deepEqual(uniforms.uOrb, [0, 0, 0.32, 0])
   assert.deepEqual(uniforms.uLayout, [1, 1, 0, 0])
   assert.deepEqual(uniforms.uStyle, [4, 1])
   assert.deepEqual(uniforms.uGrade, [1, 1])
