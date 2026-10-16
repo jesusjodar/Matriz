@@ -1,0 +1,19 @@
+{
+  "name": "matriz",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "test": "node --test",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "macos:build": "node scripts/build-macos.mjs",
+    "macos:check": "node scripts/build-macos.mjs --check",
+    "macos:install": "node scripts/build-macos.mjs --install"
+  },
+  "devDependencies": {
+    "typescript": "~6.0.2",
+    "vite": "^8.3.0"
+  }
+}
