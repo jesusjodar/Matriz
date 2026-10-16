@@ -38,3 +38,35 @@ test('reduced motion and WebGL context recovery',async ({page})=>{
   })
   expect(result).toBe(true)
 })
+
+test('Windows adapter keeps native integrations separate and renders agent and artwork palettes',async ({page})=>{
+  await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/browser-tests/fixture.html')
+  const result=await page.evaluate(async ()=>{
+    const messages=[];let receive
+    window.chrome={webview:{addEventListener:(_,listener)=>{receive=listener},postMessage:message=>messages.push(message)}}
+    document.querySelector('canvas').style.cssText='width:320px;height:240px'
+    await import('/windows/Matriz/Assets/Web/host.js')
+    const {defaultSettings}=await import('/packages/web/dist/matriz-background.js')
+    const send=data=>receive({data})
+    await send({type:'settings',settings:{...defaultSettings,backgroundStyle:0,agentEnabled:true,artworkEnabled:true,artworkIntensity:1,artworkColors:4,artworkTransition:0}})
+    await send({type:'pause',value:true})
+    const pixels=()=>new Promise(resolve=>requestAnimationFrame(()=>{
+      const canvas=document.querySelector('canvas'),gl=canvas.getContext('webgl2'),data=new Uint8Array(canvas.width*canvas.height*4),sum=[0,0,0]
+      gl.readPixels(0,0,canvas.width,canvas.height,gl.RGBA,gl.UNSIGNED_BYTE,data)
+      for(let i=0;i<data.length;i+=4)for(let c=0;c<3;c++)sum[c]+=data[i+c]
+      resolve(sum)
+    }))
+    await send({type:'agent',state:'completed'});const green=await pixels()
+    await send({type:'agent',state:'error'});const red=await pixels()
+    await send({type:'agent',state:null})
+    const image=document.createElement('canvas');image.width=image.height=64
+    const ctx=image.getContext('2d');ctx.fillStyle='#888';ctx.fillRect(0,0,64,64)
+    await send({type:'artwork',mime:'image/png',base64:image.toDataURL().split(',')[1]});const gray=await pixels()
+    await send({type:'self-test'})
+    return {green,red,gray,errors:messages.filter(x=>x.type==='error'),reply:messages.find(x=>x.type==='self-test')}
+  })
+  expect(result.errors).toEqual([]);expect(result.reply.webgl).toBe(true)
+  expect(result.reply.settings.agentEnabled).toBeUndefined();expect(result.reply.settings.audioEnabled).toBeUndefined()
+  expect(result.green[1]).toBeGreaterThan(result.green[0]*2);expect(result.red[0]).toBeGreaterThan(result.red[1]*2)
+  expect(Math.max(...result.gray)-Math.min(...result.gray)).toBeLessThan(Math.max(...result.gray)*.01)
+})

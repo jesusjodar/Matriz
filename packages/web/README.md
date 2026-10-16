@@ -35,6 +35,8 @@ npm install ./matriz-background-2.3.0.tgz
 
 ```js
 import { createMatriz, defaultSettings } from '@matriz/background';
+// El canvas debe tener un tamaño CSS explícito, por ejemplo
+// canvas { width: 100%; height: 500px; display: block; }
 const fondo = createMatriz(document.querySelector('canvas'), {
   settings: { ...defaultSettings, palette: 8,
     customLight: [0.63, 0.12, 0.45], customDeep: [0.30, 0.13, 0.56],
