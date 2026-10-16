@@ -1,0 +1,13 @@
+{
+  "name": "@matriz/background",
+  "version": "2.2.0",
+  "description": "Matriz WebGL2 background and custom element, sharing its shader with the desktop apps",
+  "type": "module",
+  "main": "./dist/matriz-background.umd.cjs",
+  "module": "./dist/matriz-background.js",
+  "types": "./index.d.ts",
+  "exports": { ".": { "types": "./index.d.ts", "import": "./dist/matriz-background.js", "require": "./dist/matriz-background.umd.cjs" } },
+  "files": ["dist", "index.d.ts", "README.md"],
+  "sideEffects": true,
+  "repository": { "type": "git", "url": "https://github.com/jesusjodar/Matriz.git", "directory": "packages/web" }
+}

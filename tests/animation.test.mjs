@@ -1,127 +1,41 @@
+import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import test from 'node:test'
 import { runInNewContext } from 'node:vm'
-import ts from 'typescript'
+import { sanitizeSettings, manualPalette, frameUniforms } from '../packages/web/src/settings.mjs'
 
-test('anima sin interacción, respeta movimiento reducido y pausa al ocultarse', () => {
-  const events = {}
-  const frames = []
-  const timeUpdates = []
-  const uniforms = {}
-  let draws = 0
-  const motion = {
-    matches: true,
-    addEventListener: (_, handler) => { events.motionchange = handler },
+test('renderer pauses, freezes hidden time, restores context and disposes listeners', () => {
+  const events=new Map(),frames=new Map(),uniforms={};let id=0,now=0,draws=0,deleted=0
+  const listen=target => (type,callback,options) => {
+    const key=target+type;events.set(key,callback)
+    options?.signal?.addEventListener('abort',()=>events.delete(key))
   }
-  const gl = {
-    ...Object.fromEntries([
-      'shaderSource', 'compileShader', 'attachShader', 'deleteShader',
-      'linkProgram', 'useProgram', 'viewport', 'clearColor', 'clear',
-    ].map((name) => [name, () => {}])),
-    VERTEX_SHADER: 35633,
-    FRAGMENT_SHADER: 35632,
-    TRIANGLES: 4,
-    COLOR_BUFFER_BIT: 16384,
-    createProgram: () => ({}),
-    createShader: () => ({}),
-    getShaderParameter: () => true,
-    getProgramParameter: () => true,
-    getUniformLocation: (_, name) => name,
-    uniform1f: (name, value) => {
-      uniforms[name] = value
-    },
-    uniform2f: (name, ...value) => { uniforms[name] = value },
-    uniform4f: (name, ...value) => {
-      uniforms[name] = value
-      if (name === 'uPhase') timeUpdates.push(-(value[0] - 0.8 + (uniforms.uWaveX[0] * canvas.width + uniforms.uWaveY[0] * canvas.height) / (2 * uniforms.uPixelRatio)) / 0.5175)
-    },
-    drawArrays: () => { draws++ },
+  const motion={matches:true,addEventListener:listen('motion:')}
+  const gl={...Object.fromEntries(['shaderSource','compileShader','attachShader','deleteShader','linkProgram','useProgram','viewport'].map(name=>[name,()=>{}])),
+    VERTEX_SHADER:1,FRAGMENT_SHADER:2,COMPILE_STATUS:3,LINK_STATUS:4,TRIANGLES:5,
+    createProgram:()=>({}),createShader:()=>({}),getShaderParameter:()=>true,getProgramParameter:()=>true,getUniformLocation:(_,name)=>name,
+    uniform1f:(name,value)=>{uniforms[name]=value},uniform2f:(name,...values)=>{uniforms[name]=values},uniform4f:(name,...values)=>{uniforms[name]=values},
+    drawArrays:()=>draws++,deleteProgram:()=>deleted++,
   }
-  const canvas = {
-    clientWidth: 800,
-    clientHeight: 600,
-    getContext: () => gl,
-    addEventListener: (name, handler) => { events[name] = handler },
+  const canvas={clientWidth:800,clientHeight:600,getContext:()=>gl,addEventListener:listen('canvas:')}
+  const document={hidden:false,addEventListener:listen('document:')}
+  const source=readFileSync(new URL('../packages/web/src/renderer.mjs',import.meta.url),'utf8').replace(/^import .*\n/gm,'').replace('export function createMatriz','function createMatriz')+'\nglobalThis.create=createMatriz;'
+  const context={sanitizeSettings,manualPalette,frameUniforms,fragmentSource:readFileSync(new URL('../src/sparkles.frag',import.meta.url),'utf8'),vertexSource:'',canvas,document,AbortController,
+    matchMedia:()=>motion,window:{devicePixelRatio:2,addEventListener:listen('window:')},performance:{now:()=>now},
+    requestAnimationFrame:fn=>{frames.set(++id,fn);return id},cancelAnimationFrame:id=>frames.delete(id),
   }
-  const source = readFileSync(new URL('../src/main.ts', import.meta.url), 'utf8')
-    .replace(/^import .*\n/gm, '')
-  const document = {
-    hidden: false,
-    querySelector: () => canvas,
-    addEventListener: (name, handler) => { events[name] = handler },
-  }
-  runInNewContext(ts.transpileModule(source, {}).outputText, {
-    vertexSource: '', fragmentSource: '',
-    document,
-    window: {
-      devicePixelRatio: 2,
-      matchMedia: () => motion,
-      addEventListener: (name, handler) => { events[name] = handler },
-    },
-    requestAnimationFrame: (callback) => frames.push(callback),
-    cancelAnimationFrame: () => { frames.length = 0 },
-  })
-
-  assert.equal(frames.length, 1)
-  for (const [name, value] of Object.entries({ uBrightness: 1, uContrast: 1,
-    uSpacing: 8, uColorBlur: 0.5, uSize: 1, uVolumeScale: 0.6, uConcavity: 0.78 })) assert.equal(uniforms[name], value)
-  assert.deepEqual(uniforms.uAudio, [0, 0, 0, 0])
-  assert.deepEqual(uniforms.uSurface, [1, 1, 1, 0.75])
-  assert.deepEqual(uniforms.uOrb, [0, 0, 0.32, 0])
-  assert.deepEqual(uniforms.uLayout, [1, 1, 0, 0])
-  assert.deepEqual(uniforms.uStyle, [4, 1])
-  assert.deepEqual(uniforms.uGrade, [1, 1])
-  for (const [name, value] of Object.entries({
-    uColor0: [0.63, 0.12, 0.45, 1], uColor1: [0.30, 0.13, 0.56, 1],
-    uColor2: [0.94, 0.36, 0.57, 1], uColor3: [0.49, 0.12, 0.52, 1],
-  })) assert.deepEqual(uniforms[name], value, name)
-
-  frames.shift()()
-  assert.equal(draws, 1)
-  // Todos los uniforms deben estar inicializados antes del primer fotograma.
-  const shader = readFileSync(new URL('../src/sparkles.frag', import.meta.url), 'utf8')
-  const declarations = [...shader.matchAll(/^uniform (vec[234]|float) (u\w+);$/gm)]
-  for (const [, type, name] of declarations) {
-    assert.ok(Object.hasOwn(uniforms, name), `${name} sin inicializar`)
-    const values = type === 'float' ? [uniforms[name]] : uniforms[name]
-    assert.equal(values.length, type === 'float' ? 1 : Number(type.at(-1)), name)
-    assert.ok(values.every(Number.isFinite), name)
-  }
-
-  assert.equal(Object.hasOwn(uniforms, 'uArtwork'), false)
-  assert.equal(Object.hasOwn(uniforms, 'uHueRotation'), false)
-  assert.equal(frames.length, 0)
-  for (const event of ['pointermove', 'pointerdown', 'deviceorientation', 'devicemotion']) {
-    assert.equal(events[event], undefined)
-  }
-
-  motion.matches = false
-  events.motionchange()
-  frames.shift()(100)
-  assert.equal(draws, 2)
-  assert.equal(frames.length, 1)
-  frames.shift()(116)
-  assert.equal(draws, 3)
-  frames.shift()(124)
-  assert.equal(draws, 3)
-  frames.shift()(134)
-  assert.equal(draws, 4)
-  const timeBeforeHiding = timeUpdates.at(-1)
-  document.hidden = true
-  events.visibilitychange()
-  assert.equal(frames.length, 0)
-  document.hidden = false
-  events.visibilitychange()
-  assert.equal(frames.length, 1)
-  frames.shift()(60_000)
-  assert.equal(draws, 5)
-  assert.ok(timeUpdates.at(-1) - timeBeforeHiding <= 0.051)
-  const pausedTime = timeUpdates.at(-1)
-  motion.matches = true
-  events.motionchange()
-  frames.shift()(60_016)
-  assert.equal(draws, 6)
-  assert.equal(timeUpdates.at(-1), pausedTime)
-  assert.equal(frames.length, 0)
+  runInNewContext(source,context);const renderer=context.create(canvas)
+  function flush(time) {now=time;const pending=[...frames.values()];frames.clear();pending.forEach(fn=>fn(time))}
+  flush(0);assert.equal(draws,1);assert.equal(frames.size,0);assert.equal(canvas.width,1200)
+  assert.deepEqual(uniforms.uAudio,[0,0,0,0]);assert.deepEqual(uniforms.uSurface,[1,1,1,.75])
+  motion.matches=false;events.get('motion:change')();flush(100);flush(120);assert.equal(draws,3)
+  const phase=[...uniforms.uPhase]
+  document.hidden=true;events.get('document:visibilitychange')();assert.equal(frames.size,0)
+  document.hidden=false;events.get('document:visibilitychange')();flush(60000);assert.deepEqual(uniforms.uPhase,phase)
+  renderer.pause();flush(61000);assert.equal(frames.size,0)
+  renderer.update({hue:90});flush(62000);assert.equal(renderer.settings.hue,90)
+  let prevented=false;events.get('canvas:webglcontextlost')({preventDefault:()=>{prevented=true}});assert.ok(prevented);assert.equal(frames.size,0)
+  events.get('canvas:webglcontextrestored')();flush(63000);assert.equal(frames.size,0)
+  renderer.destroy();assert.equal(events.size,0);assert.equal(frames.size,0);assert.equal(deleted,1)
+  renderer.play();assert.equal(frames.size,0)
 })

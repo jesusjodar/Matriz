@@ -1,0 +1,312 @@
+{
+  "version": 2,
+  "settings": [
+    {
+      "key": "backgroundStyle",
+      "label": "Composition",
+      "group": "Appearance",
+      "kind": "choice",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 5.0,
+      "choices": [
+        "Full screen",
+        "Lower wave",
+        "Upper wave",
+        "Central wave",
+        "Orb",
+        "Inverted orb"
+      ]
+    },
+    {
+      "key": "wavePosition",
+      "label": "Wave position",
+      "group": "Appearance",
+      "kind": "number",
+      "default": 0.0,
+      "min": -0.35,
+      "max": 0.35
+    },
+    {
+      "key": "orbSize",
+      "label": "Orb size",
+      "group": "Appearance",
+      "kind": "number",
+      "default": 1.0,
+      "min": 0.2,
+      "max": 6.0
+    },
+    {
+      "key": "orbX",
+      "label": "Orb center X",
+      "group": "Appearance",
+      "kind": "number",
+      "default": 0.0,
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "key": "orbY",
+      "label": "Orb center Y",
+      "group": "Appearance",
+      "kind": "number",
+      "default": 0.0,
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "key": "palette",
+      "label": "Palette",
+      "group": "Appearance",
+      "kind": "choice",
+      "default": 5.0,
+      "min": 0.0,
+      "max": 8.0,
+      "choices": [
+        "Deep blue",
+        "Violet night",
+        "Lagoon",
+        "Aurora",
+        "Sunset",
+        "Rose",
+        "Amber",
+        "Graphite",
+        "Custom"
+      ]
+    },
+    {
+      "key": "customLight",
+      "label": "Primary color",
+      "group": "Appearance",
+      "kind": "color",
+      "default": [
+        0.1,
+        0.24,
+        0.68
+      ]
+    },
+    {
+      "key": "customDeep",
+      "label": "Second color",
+      "group": "Appearance",
+      "kind": "color",
+      "default": [
+        0.018,
+        0.035,
+        0.13
+      ]
+    },
+    {
+      "key": "customSoft",
+      "label": "Third color",
+      "group": "Appearance",
+      "kind": "color",
+      "default": [
+        0.24,
+        0.15,
+        0.55
+      ]
+    },
+    {
+      "key": "customAccent",
+      "label": "Accent color",
+      "group": "Appearance",
+      "kind": "color",
+      "default": [
+        0.025,
+        0.48,
+        0.63
+      ]
+    },
+    {
+      "key": "paletteRichness",
+      "label": "Color variety",
+      "group": "Appearance",
+      "kind": "number",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0
+    },
+    {
+      "key": "colorBlur",
+      "label": "Color noise blur",
+      "group": "Appearance",
+      "kind": "number",
+      "default": 0.5,
+      "min": 0.0,
+      "max": 1.0
+    },
+    {
+      "key": "hue",
+      "label": "Hue",
+      "group": "Appearance",
+      "kind": "number",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 360.0
+    },
+    {
+      "key": "brightness",
+      "label": "Brightness",
+      "group": "Appearance",
+      "kind": "number",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 2.0
+    },
+    {
+      "key": "saturation",
+      "label": "Saturation",
+      "group": "Appearance",
+      "kind": "number",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 2.0
+    },
+    {
+      "key": "colorContrast",
+      "label": "Color contrast",
+      "group": "Appearance",
+      "kind": "number",
+      "default": 1.0,
+      "min": 0.5,
+      "max": 2.0
+    },
+    {
+      "key": "sparkleShape",
+      "label": "Particle shape",
+      "group": "Particles",
+      "kind": "choice",
+      "default": 0.0,
+      "min": 0.0,
+      "max": 2.0,
+      "choices": [
+        "Sparkles",
+        "Circles",
+        "Squares"
+      ]
+    },
+    {
+      "key": "spacing",
+      "label": "Spacing",
+      "group": "Particles",
+      "kind": "number",
+      "default": 8.0,
+      "min": 6.0,
+      "max": 16.0
+    },
+    {
+      "key": "size",
+      "label": "Particle size",
+      "group": "Particles",
+      "kind": "number",
+      "default": 1.0,
+      "min": 0.6,
+      "max": 1.4
+    },
+    {
+      "key": "concavity",
+      "label": "Base concavity",
+      "group": "Particles",
+      "kind": "number",
+      "default": 0.78,
+      "min": 0.0,
+      "max": 0.85
+    },
+    {
+      "key": "waveSizeInfluence",
+      "label": "Size follows depth",
+      "group": "Particles",
+      "kind": "number",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 3.0
+    },
+    {
+      "key": "depthConcavity",
+      "label": "Shape follows size",
+      "group": "Particles",
+      "kind": "number",
+      "default": 0.75,
+      "min": 0,
+      "max": 1
+    },
+    {
+      "key": "waveOpacity",
+      "label": "Wave opacity",
+      "group": "Particles",
+      "kind": "number",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0
+    },
+    {
+      "key": "sparkleOpacity",
+      "label": "Particle opacity",
+      "group": "Particles",
+      "kind": "number",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 1.0
+    },
+    {
+      "key": "shadowLight",
+      "label": "Shadow light",
+      "group": "Particles",
+      "kind": "number",
+      "default": 0.32,
+      "min": 0.0,
+      "max": 0.8
+    },
+    {
+      "key": "contrast",
+      "label": "Depth",
+      "group": "Particles",
+      "kind": "number",
+      "default": 1.0,
+      "min": 0.5,
+      "max": 1.5
+    },
+    {
+      "key": "speed",
+      "label": "Pace",
+      "group": "Motion",
+      "kind": "number",
+      "default": 1.50166015625,
+      "min": 0.25,
+      "max": 2.0
+    },
+    {
+      "key": "volumeScale",
+      "label": "Wave size",
+      "group": "Motion",
+      "kind": "number",
+      "default": 0.6,
+      "min": 0.6,
+      "max": 1.8
+    },
+    {
+      "key": "deformation",
+      "label": "Particle drift",
+      "group": "Motion",
+      "kind": "number",
+      "default": 4.0,
+      "min": 0.0,
+      "max": 4.0
+    },
+    {
+      "key": "quality",
+      "label": "Graphics quality",
+      "group": "General",
+      "kind": "choice",
+      "default": 1.0,
+      "min": 0.0,
+      "max": 2.0,
+      "choices": [
+        "Save energy",
+        "Balanced",
+        "Maximum sharpness"
+      ]
+    }
+  ]
+}

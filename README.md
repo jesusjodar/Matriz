@@ -23,6 +23,27 @@
 
 Matriz dibuja detrás de los iconos del escritorio, en todas las pantallas. Un campo orgánico de luz, color y destellos se mueve despacio: la profundidad anima el tamaño de cada partícula y el flujo traslada sus centros sin deformar las figuras. No usa el ratón, ni sensores, ni clics. Si lo deseas, Matriz escucha la salida de audio del Mac y sustituye su paleta por los colores de la portada que esté sonando.
 
+## Windows y componente web
+
+Matriz también dispone de una [aplicación Windows con ajustes nativos WinUI 3](windows/README.md) para x64 y ARM64 y un [componente web listo para integrar](packages/web/README.md). Los paquetes se generan en el [flujo multiplataforma](https://github.com/jesusjodar/Matriz/actions/workflows/multiplatform.yml), en sus artefactos de cada compilación correcta.
+
+La web es exclusivamente visual: **sin música, IA ni ajustes visibles**. Configura los valores directamente en JavaScript o en el atributo `settings`. Incluye un [ejemplo completo](packages/web/example.html), tipos TypeScript, módulos ESM y un script clásico.
+
+| Función | macOS | Windows | Web |
+|---|---|---|---|
+| Shader, paletas y ajustes visuales | Metal | WebGL2 | WebGL2 |
+| Panel nativo | SwiftUI / Liquid Glass | WinUI 3 | Configuración por código |
+| Audio del sistema | Core Audio Taps | WASAPI loopback | — |
+| Paleta de portada | Música / Spotify | Sesiones multimedia de Windows | — |
+| Estados de agentes | Hooks locales | Hooks locales | — |
+| Escritorio | Todas las pantallas | Escritorio virtual de Explorer | Fondo de un contenedor HTML |
+| Salvapantallas | `.saver` y extensión | — | — |
+| Extensión Wallpaper / bloqueo | macOS 26+, API privada | — | — |
+
+Los cambios futuros mantienen los tres clientes mediante un shader común, un contrato de valores en `shared/` y compilaciones de las tres plataformas. Las integraciones propias de cada sistema se mantienen fuera de la API web. La compilación automatizada de Windows no sustituye una prueba física de Explorer, sonido y reproductores.
+
+El resto de esta guía describe la aplicación de **macOS**; consulta las guías enlazadas para instalar Windows o integrar la web.
+
 ## Índice
 
 - [Qué es Matriz](#qué-es-matriz)

@@ -31,3 +31,11 @@ build/
 *.xcuserstate
 .env
 .env.*
+
+# Windows and package output
+**/bin/
+**/obj/
+windows/Matriz/Assets/
+*.tgz
+test-results/
+playwright-report/

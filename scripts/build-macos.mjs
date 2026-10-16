@@ -92,7 +92,7 @@ run('xcrun', [...common, '-D', 'WALLPAPER_CHECK', 'macos/Wallpaper/MatrizWallpap
   'macos/Wallpaper/MatrizWallpaperCheck.swift', '-import-objc-header', 'macos/Wallpaper/MatrizWallpaper.h',
   '-framework', 'ExtensionFoundation', '-framework', 'IOSurface', '-framework', 'Security',
   '-module-name', 'MatrizWallpaperCheck', '-o', join(output, 'MatrizWallpaperCheck')])
-run(join(output, 'MatrizWallpaperCheck'), [wallpaper])
+if (!process.argv.includes('--compile-only')) run(join(output, 'MatrizWallpaperCheck'), [wallpaper])
 function signBundles() {
   run('codesign', ['--force', '--sign', '-', '--timestamp=none', '--entitlements', entitlements, wallpaper])
   for (const path of [app, saver]) run('codesign', ['--force', '--sign', '-', '--timestamp=none', path])

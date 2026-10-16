@@ -10,9 +10,14 @@
     "preview": "vite preview",
     "macos:build": "node scripts/build-macos.mjs",
     "macos:check": "node scripts/build-macos.mjs --check",
-    "macos:install": "node scripts/build-macos.mjs --install"
+    "macos:install": "node scripts/build-macos.mjs --install",
+    "web:build": "vite build --config packages/web/vite.config.mjs",
+    "web:pack": "npm run web:build && node -e \"require('fs').mkdirSync('build',{recursive:true})\" && npm pack ./packages/web --pack-destination build",
+    "windows:prepare": "node scripts/prepare-windows.mjs",
+    "test:browser": "playwright test"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.1",
     "typescript": "~6.0.2",
     "vite": "^8.3.0"
   }

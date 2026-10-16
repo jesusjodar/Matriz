@@ -1,0 +1,93 @@
+name: Multiplatform
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build && npm run web:pack
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:browser
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Matriz-Web
+          path: |
+            build/*.tgz
+            packages/web/dist/
+            packages/web/README.md
+            packages/web/example.html
+          if-no-files-found: error
+  windows:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: x64
+            rid: win-x64
+          - platform: ARM64
+            rid: win-arm64
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - uses: microsoft/setup-msbuild@v2
+      - run: npm ci
+      - run: npm run windows:prepare
+      - name: Build portable WinUI 3 app
+        shell: pwsh
+        run: |
+          msbuild windows/Matriz/Matriz.csproj /restore /t:Publish /p:Configuration=Release /p:Platform=${{ matrix.platform }} /p:RuntimeIdentifier=${{ matrix.rid }} /p:PublishDir="$env:GITHUB_WORKSPACE/publish/${{ matrix.rid }}/"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Native self-test
+        if: matrix.platform == 'x64'
+        shell: pwsh
+        run: |
+          $process = Start-Process "./publish/${{ matrix.rid }}/Matriz.exe" -ArgumentList '--self-test' -Wait -PassThru
+          if (Test-Path "$env:TEMP/Matriz-self-test.json") { Get-Content "$env:TEMP/Matriz-self-test.json" }
+          if ($process.ExitCode -ne 0) { throw "Matriz self-test failed: $($process.ExitCode)" }
+      - name: Pack
+        shell: pwsh
+        run: |
+          Copy-Item windows/README.md "publish/${{ matrix.rid }}/README.md"
+          Compress-Archive "publish/${{ matrix.rid }}/*" "Matriz-Windows-${{ matrix.platform }}.zip"
+          $hash = (Get-FileHash "Matriz-Windows-${{ matrix.platform }}.zip" -Algorithm SHA256).Hash.ToLower()
+          "$hash  Matriz-Windows-${{ matrix.platform }}.zip" | Set-Content -Encoding ascii "SHA256SUMS-${{ matrix.platform }}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Matriz-Windows-${{ matrix.platform }}
+          path: |
+            Matriz-Windows-${{ matrix.platform }}.zip
+            SHA256SUMS-${{ matrix.platform }}
+          if-no-files-found: error
+  macos:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - name: Compile generated Metal
+        run: |
+          node scripts/check-metal.mjs
+      - name: Compile macOS app and saver
+        run: npm run macos:build -- --compile-only

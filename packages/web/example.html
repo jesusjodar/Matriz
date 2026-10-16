@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Matriz · Fondo web</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;background:#000;color:white;font:18px system-ui}
+  main{position:relative;isolation:isolate;min-height:100svh;display:grid;place-items:center;padding:32px}
+  article{position:relative;max-width:650px}h1{font-size:clamp(3rem,10vw,7rem);margin:0}p{line-height:1.6}
+</style>
+<main>
+  <matriz-background id="fondo"></matriz-background>
+  <article><h1>Matriz</h1><p>Un fondo orgánico para tu web. Configura sus valores en el código de esta página.</p></article>
+</main>
+<script type="module">
+  import './dist/matriz-background.js';
+  document.querySelector('#fondo').settings = {
+    palette: 5, backgroundStyle: 0, speed: 0.7,
+    brightness: 1, shadowLight: 0.32, colorBlur: 0.65,
+    size: 1, deformation: 2, quality: 1
+  };
+</script>
+</html>
