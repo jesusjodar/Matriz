@@ -117,11 +117,11 @@ Matriz también respeta **Reducir movimiento** de macOS, que deja una imagen fij
 Descarga el archivo desde la [página de releases](https://github.com/jesusjodar/Matriz/releases) y comprueba su integridad:
 
 ```sh
-curl --fail --location -o Matriz-2.3.0.zip https://github.com/jesusjodar/Matriz/releases/download/v2.3.0/Matriz-2.3.0.zip
+curl --fail --location -o Matriz-macOS-arm64-2.3.0.zip https://github.com/jesusjodar/Matriz/releases/download/v2.3.0/Matriz-macOS-arm64-2.3.0.zip
 
 curl --fail --location -o SHA256SUMS https://github.com/jesusjodar/Matriz/releases/download/v2.3.0/SHA256SUMS
 shasum -a 256 -c SHA256SUMS --ignore-missing
-# Debe mostrar: Matriz-2.3.0.zip: OK
+# Debe mostrar: Matriz-macOS-arm64-2.3.0.zip: OK
 # SHA-256:
 # e3eed67d35919266bf96874aefe633913e072b33ca4a32c99bba7cbd4067aa8a
 ```
@@ -131,7 +131,7 @@ shasum -a 256 -c SHA256SUMS --ignore-missing
 Matriz está firmada localmente y no está notarizada por Apple, así que macOS marca la descarga como en cuarentena. Retírala con un comando antes de abrirla (si no, verás «no se puede abrir» o «está dañada»):
 
 ```sh
-unzip -q Matriz-2.3.0.zip
+unzip -q Matriz-macOS-arm64-2.3.0.zip
 xattr -dr com.apple.quarantine Matriz.app Matriz.saver
 ```
 

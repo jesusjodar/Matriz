@@ -5,3 +5,4 @@
 - El componente web es solo visual: sin IA, música ni controles visibles. Sus valores se configuran en código; no expongas las integraciones de escritorio en su API ni en sus tipos.
 - Ejecuta las pruebas compartidas y las compilaciones que afecte el cambio. La integración continua comprueba web, Windows y macOS. No presentes una compilación como una prueba física del escritorio, el audio o el bloqueo.
 - Conserva siempre los ajustes existentes del usuario; no restablezcas preferencias ni cambies el fondo elegido para probar una actualización.
+- Los ZIP de macOS deben incluir plataforma, arquitectura real y versión: `Matriz-macOS-arm64-2.3.0.zip`. Actualiza conjuntamente enlaces, notas de release y `SHA256SUMS` al renombrarlos.
