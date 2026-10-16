@@ -5,6 +5,26 @@ import ScreenSaver
 
 @main
 enum MatrizCheck {
+    static func checkSharedSettings(_ bundle: Bundle) throws {
+        let defaults = MatrizSettings(["settingsVersion": 2]).values as NSDictionary
+        var keys = Set<String>()
+        for file in ["settings", "native-settings"] {
+            let data = try Data(contentsOf: bundle.url(forResource: file, withExtension: "json")!)
+            let schema = try JSONSerialization.jsonObject(with: data) as! [String: Any]
+            for spec in schema["settings"] as! [[String: Any]] {
+                let key = spec["key"] as! String
+                precondition(keys.insert(key).inserted, "Duplicate setting: \(key)")
+                precondition(NSDictionary(dictionary: [key: spec["default"]!]).isEqual(to: [key: defaults[key]!]), "Shared default differs: \(key)")
+                if let min = spec["min"] as? Double, let max = spec["max"] as? Double {
+                    for (input, expected) in [(min - 10, min), (max + 10, max)] {
+                        let value = MatrizSettings(["settingsVersion": 2, key: input]).values[key] as! NSNumber
+                        precondition(abs(value.doubleValue - expected) < 1e-12, "Shared bounds differ: \(key)")
+                    }
+                }
+            }
+        }
+        precondition(keys == Set(defaults.allKeys.compactMap { $0 as? String }).subtracting(["settingsVersion"]), "Shared contract omits native settings")
+    }
     static func checkLocalization(_ bundle: Bundle) {
         precondition(bundle.object(forInfoDictionaryKey: "CFBundleName") as? String == "Matriz")
         precondition(bundle.object(forInfoDictionaryKey: "CFBundleExecutable") as? String == "Matriz")
@@ -385,6 +405,12 @@ enum MatrizCheck {
     }
 
     static func main() throws {
+        if CommandLine.arguments[1] == "--contract-only" {
+            try checkSharedSettings(Bundle(path: CommandLine.arguments[2])!)
+            checkSettingsAndClock()
+            print("Shared settings and native validation passed")
+            return
+        }
         if CommandLine.arguments[1] == "--preferences-child" {
             let preferences = MatrizPreferences(domain: CommandLine.arguments[2])
             precondition(preferences.settings.speed == 1.6 && preferences.settings.palette == 2 && preferences.settings.hue == 123)
@@ -425,6 +451,7 @@ enum MatrizCheck {
         checkSettingsAndClock()
         try checkPreferences()
         let app = Bundle(path: CommandLine.arguments[1])!
+        try checkSharedSettings(app)
         checkLocalization(app)
         precondition(app.object(forInfoDictionaryKey: "NSAudioCaptureUsageDescription") != nil)
         precondition(app.object(forInfoDictionaryKey: "NSAppleEventsUsageDescription") != nil)

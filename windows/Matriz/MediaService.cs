@@ -40,7 +40,8 @@ public sealed class MediaService : IDisposable
         try {
             var next = new WasapiLoopbackCapture();
             channels = next.WaveFormat.Channels; sampleRate = next.WaveFormat.SampleRate; filled = 0;
-            if (channels < 1 || channels > 32 || next.WaveFormat.BitsPerSample != 32) { next.Dispose(); throw new NotSupportedException("Audio loopback requires a 32-bit float output format."); }
+            var floating = next.WaveFormat.Encoding == WaveFormatEncoding.IeeeFloat || next.WaveFormat is WaveFormatExtensible format && format.SubFormat == new Guid("00000003-0000-0010-8000-00aa00389b71");
+            if (channels < 1 || channels > 32 || next.WaveFormat.BitsPerSample != 32 || !floating) { next.Dispose(); throw new NotSupportedException("Audio loopback requires a 32-bit float output format."); }
             samples = new float[2048 * channels];
             next.DataAvailable += Samples;
             next.RecordingStopped += (_, e) => { if (e.Exception != null) error(e.Exception.Message); };

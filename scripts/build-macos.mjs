@@ -15,7 +15,8 @@ const version = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).ver
 const buildNumber = '9'
 const icons = join(output, 'Icons')
 mkdirSync(icons, { recursive: true })
-run('xcrun', ['actool', 'macos/Assets/Matriz.icon', '--compile', icons,
+// The hosted Xcode 26 compiler cannot read the Xcode 27 Icon Composer format; local release builds validate it.
+if (!process.argv.includes('--compile-only')) run('xcrun', ['actool', 'macos/Assets/Matriz.icon', '--compile', icons,
   '--platform', 'macosx', '--minimum-deployment-target', '14.0', '--app-icon', 'Matriz',
   '--output-partial-info-plist', join(icons, 'partial.plist'), '--target-device', 'mac'])
 const icon = join(icons, 'Matriz.icns')
@@ -39,8 +40,11 @@ function bundle(name, extension, identifier, principalClass) {
     console.warn(`Aviso: no se pudo precompilar Matriz.metallib (${error.message}); se usará la fuente .metal.`)
   }
   cpSync(join(root, 'integrations'), join(path, 'Contents/Resources/AgentIntegrations'), { recursive: true })
-  cpSync(icon, join(path, 'Contents/Resources/Matriz.icns'))
-  cpSync(join(icons, 'Assets.car'), join(path, 'Contents/Resources/Assets.car'))
+  for (const file of ['settings.json', 'native-settings.json']) cpSync(join(root, 'shared', file), join(path, 'Contents/Resources', file))
+  if (!process.argv.includes('--compile-only')) {
+    cpSync(icon, join(path, 'Contents/Resources/Matriz.icns'))
+    cpSync(join(icons, 'Assets.car'), join(path, 'Contents/Resources/Assets.car'))
+  }
   cpSync(join(root, 'macos/Assets/Author.jpg'), join(path, 'Contents/Resources/Author.jpg'))
   writeLocalizations(root, join(path, 'Contents/Resources'), !principalClass)
   const plist = {
@@ -118,8 +122,11 @@ if (process.argv.includes('--install')) {
 
 if (process.argv.includes('--check')) {
   run('xcrun', [...common, ...media, 'macos/MatrizMediaCheck.swift', 'macos/MatrizAgentCheck.swift', 'macos/MatrizCheck.swift', '-module-name', 'MatrizCheck', '-o', join(output, 'MatrizCheck')])
-  run(join(output, 'MatrizCheck'), [app, join(output, 'Matriz-preview.png'), saver])
-  cpSync(join(output, 'Matriz-preview.png'), join(wallpaper, 'Contents/Resources/Matriz-thumbnail.png'))
-  signBundles()
+  if (process.argv.includes('--compile-only')) run(join(output, 'MatrizCheck'), ['--contract-only', app])
+  else {
+    run(join(output, 'MatrizCheck'), [app, join(output, 'Matriz-preview.png'), saver])
+    cpSync(join(output, 'Matriz-preview.png'), join(wallpaper, 'Contents/Resources/Matriz-thumbnail.png'))
+    signBundles()
+  }
 }
 console.log(`Listo: ${app}\nSalvapantallas: ${saver}`)

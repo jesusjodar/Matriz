@@ -90,4 +90,4 @@ jobs:
         run: |
           node scripts/check-metal.mjs
       - name: Compile macOS app and saver
-        run: npm run macos:build -- --compile-only
+        run: npm run macos:build -- --compile-only --check

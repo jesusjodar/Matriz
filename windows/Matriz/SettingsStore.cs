@@ -11,7 +11,7 @@ public sealed class SettingsStore
     private static readonly JsonObject Strings = JsonNode.Parse(File.ReadAllText(Path.Combine(Assets, "strings.json")))!.AsObject();
     public JsonObject Values { get; private set; }
     public event Action? Changed;
-    public string? LoadError { get; }
+    public string? LoadError { get; private set; }
     private readonly string path;
 
     public SettingsStore(string? testPath = null)
@@ -56,7 +56,7 @@ public sealed class SettingsStore
         var temporary = path + "." + Guid.NewGuid().ToString("N") + ".tmp";
         try { File.WriteAllText(temporary, next.ToJsonString()); File.Move(temporary, path, true); }
         finally { if (File.Exists(temporary)) File.Delete(temporary); }
-        Values = next; Changed?.Invoke();
+        Values = next; LoadError = null; Changed?.Invoke();
     }
     public double Number(string key) => Values[key]!.GetValue<double>();
     public bool Enabled(string key) => Values[key]!.GetValue<bool>();

@@ -51,30 +51,30 @@ float depthAt(vec3 flow, float contrast, float music) {
   return 0.5 + 0.5 * signal / sqrt(0.55 + signal * signal);
 }
 
-float backgroundMask(vec2 position, vec2 resolution, vec3 flow, vec4 layout, vec4 orb) {
-  if (layout.x < 0.5) return 1.0;
+float backgroundMask(vec2 position, vec2 resolution, vec3 flow, vec4 composition, vec4 orb) {
+  if (composition.x < 0.5) return 1.0;
   vec2 uv = position / resolution;
-  if (layout.x < 2.5) {
+  if (composition.x < 2.5) {
     float side = (uv.x - 0.5) * 2.0;
     // El signo unifica "+ sube la onda" en la inferior y la superior.
-    float rise = layout.x < 1.5 ? layout.w : -layout.w;
-    float edge = 0.43 + rise + (layout.y - 1.0) * 0.12 + 0.24 * side * side * (1.0 + side * 0.20)
+    float rise = composition.x < 1.5 ? composition.w : -composition.w;
+    float edge = 0.43 + rise + (composition.y - 1.0) * 0.12 + 0.24 * side * side * (1.0 + side * 0.20)
       + flow.x * 0.045 + flow.z * 0.025;
-    float y = layout.x < 1.5 ? uv.y : 1.0 - uv.y;
+    float y = composition.x < 1.5 ? uv.y : 1.0 - uv.y;
     return 1.0 - smoothstep(edge - 0.09, edge + 0.09, y);
   }
-  if (layout.x < 3.5) {
-    float center = 0.5 + layout.w + flow.x * 0.045 + flow.z * 0.025;
-    float width = 0.16 * layout.y + flow.y * 0.025;
+  if (composition.x < 3.5) {
+    float center = 0.5 + composition.w + flow.x * 0.045 + flow.z * 0.025;
+    float width = 0.16 * composition.y + flow.y * 0.025;
     return 1.0 - smoothstep(width - 0.075, width + 0.075, abs(uv.y - center));
   }
   vec2 point = (position - resolution * 0.5) / min(resolution.x, resolution.y) - orb.xy;
   float irregular = sin(point.x * 11.0 + flow.z) * sin(point.y * 9.0 + flow.y);
-  float radius = 0.34 * layout.y * (1.0 + flow.x * (0.055 + orb.w * 0.13)
+  float radius = 0.34 * composition.y * (1.0 + flow.x * (0.055 + orb.w * 0.13)
     + flow.y * (0.035 + orb.w * 0.10) + irregular * orb.w * 0.09);
-  float feather = 0.08 * clamp(layout.y, 0.6, 2.0);
+  float feather = 0.08 * clamp(composition.y, 0.6, 2.0);
   float coverage = 1.0 - smoothstep(radius - feather, radius + feather, length(point));
-  return layout.x < 4.5 ? coverage : 1.0 - coverage;
+  return composition.x < 4.5 ? coverage : 1.0 - coverage;
 }
 
 float geometricCoverage(vec2 cell, float radius, float concavity, vec2 pixel, float shape) {
@@ -99,7 +99,7 @@ float particleConcavity(float radius, float base, float influence) {
 
 float pointCoverage(vec2 screen, vec2 center, vec2 resolution,
   float spacing, vec4 phase, vec4 waveX, vec4 waveY, float contrast, float music,
-  float size, float concavity, vec4 surface, float amplitude, vec2 pixel, vec4 layout, vec4 orb) {
+  float size, float concavity, vec4 surface, float amplitude, vec2 pixel, vec4 composition, vec4 orb) {
   vec3 flow = sin(anglesAt(center, phase, waveX, waveY));
   float depth = depthAt(flow, contrast, music);
   vec2 position = center + particleOffset(anglesAt(center, phase, waveX, waveY), contrast, music, amplitude);
@@ -108,31 +108,31 @@ float pointCoverage(vec2 screen, vec2 center, vec2 resolution,
   // Fuera de esta caja la cobertura es exactamente cero: margen conservador sobre las saturaciones.
   float reach = radius + 2.0 * max(pixel.x, pixel.y) * spacing + 0.001 * spacing;
   if (max(abs(screen.x - position.x), abs(screen.y - position.y)) > reach) return 0.0;
-  float mask = backgroundMask(position, resolution, flow, layout, orb);
+  float mask = backgroundMask(position, resolution, flow, composition, orb);
   if (mask == 0.0) return 0.0;
   radius *= smoothstep(0.0, 0.75, mask);
   float curve = 0.88;
-  if (layout.z < 0.5) {
+  if (composition.z < 0.5) {
     curve = particleConcavity(radius, concavity, surface.w);
   }
-  return geometricCoverage(abs(screen - position) / spacing, radius / spacing, curve, pixel, layout.z)
+  return geometricCoverage(abs(screen - position) / spacing, radius / spacing, curve, pixel, composition.z)
     * (0.4 + depth * 0.6);
 }
 
 float cellSparkle(vec2 screen, vec2 inverseGrid, float stagger, vec2 resolution,
   float spacing, vec4 phase, vec4 waveX, vec4 waveY, float contrast, float music,
-  float size, float concavity, vec4 surface, float amplitude, vec2 pixel, vec4 layout, float displacement, vec4 orb) {
+  float size, float concavity, vec4 surface, float amplitude, vec2 pixel, vec4 composition, float displacement, vec4 orb) {
   vec2 grid = inverseGrid + stagger;
   vec2 center = (floor(grid) + 0.5 - stagger) * spacing;
   float coverage = pointCoverage(screen, center, resolution, spacing, phase, waveX, waveY,
-    contrast, music, size, concavity, surface, amplitude, pixel, layout, orb);
+    contrast, music, size, concavity, surface, amplitude, pixel, composition, orb);
   // La compresión puede acercar ambas vecinas: comprueba la caja completa sin umbrales que recorten figuras.
   if (displacement > 1.0) {
     for (int y = -1; y <= 1; y++) {
       for (int x = -1; x <= 1; x++) {
         if (x != 0 || y != 0) {
           float next = pointCoverage(screen, center + vec2(float(x), float(y)) * spacing, resolution, spacing,
-            phase, waveX, waveY, contrast, music, size, concavity, surface, amplitude, pixel, layout, orb);
+            phase, waveX, waveY, contrast, music, size, concavity, surface, amplitude, pixel, composition, orb);
           coverage += next * (1.0 - coverage);
         }
       }
@@ -150,12 +150,12 @@ void main() {
   vec3 flow = sin(angles);
   vec4 audio = clamp(uAudio, vec4(0.0), vec4(1.0));
   float music = clamp(audio.x * 0.70 + audio.y * 0.18 + audio.z * 0.32, 0.0, 1.0);
-  vec4 layout = uLayout;
+  vec4 composition = uLayout;
   vec4 orb = uOrb;
-  if (layout.x < 3.5) layout.y = 1.0 + audio.x * 0.70 + audio.y * 0.22;
-  else layout.y *= 1.0 + audio.x * 0.28;
+  if (composition.x < 3.5) composition.y = 1.0 + audio.x * 0.70 + audio.y * 0.22;
+  else composition.y *= 1.0 + audio.x * 0.28;
   orb.w = audio.z;
-  float mask = backgroundMask(screen, resolution, flow, layout, orb);
+  float mask = backgroundMask(screen, resolution, flow, composition, orb);
   // Las derivadas quedan bajo el gate uniforme de uSurface.y (flujo uniforme, como antes).
   float spacing = max(uSpacing, 6.0);
   vec2 pixel = vec2(0.0001);
@@ -201,8 +201,8 @@ void main() {
           (1.0 + dx.x) * residual.y - dx.y * residual.x) / determinant;
       }
       vec2 inverseGrid = inverseScreen / spacing;
-      float first = cellSparkle(screen, inverseGrid, 0.0, resolution, spacing, uPhase, uWaveX, uWaveY, uContrast, music, uSize * (1.0 + audio.z * 0.18), uConcavity, uSurface, amplitude, pixel, layout, uStyle.x, orb);
-      float second = cellSparkle(screen, inverseGrid, 0.5, resolution, spacing, uPhase, uWaveX, uWaveY, uContrast, music, uSize * (1.0 + audio.z * 0.18), uConcavity, uSurface, amplitude, pixel, layout, uStyle.x, orb);
+      float first = cellSparkle(screen, inverseGrid, 0.0, resolution, spacing, uPhase, uWaveX, uWaveY, uContrast, music, uSize * (1.0 + audio.z * 0.18), uConcavity, uSurface, amplitude, pixel, composition, uStyle.x, orb);
+      float second = cellSparkle(screen, inverseGrid, 0.5, resolution, spacing, uPhase, uWaveX, uWaveY, uContrast, music, uSize * (1.0 + audio.z * 0.18), uConcavity, uSurface, amplitude, pixel, composition, uStyle.x, orb);
       sparkle = first + second - first * second;
     }
     float relief = mix(orb.z, 1.12, depth);
