@@ -26,7 +26,6 @@ internal static class Desktop
     [DllImport("user32.dll")] private static extern bool ShowWindow(nint hwnd, int command);
     [DllImport("user32.dll")] private static extern bool SetForegroundWindow(nint hwnd);
     [DllImport("kernel32.dll")] private static extern bool GetSystemPowerStatus(out Power power);
-    [DllImport("user32.dll")] private static extern bool GetUserObjectInformation(nint handle, int index, out uint flags, uint size, out uint needed);
     [DllImport("user32.dll")] private static extern nint OpenInputDesktop(uint flags, bool inherit, uint access);
     [DllImport("user32.dll")] private static extern bool CloseDesktop(nint desktop);
 

@@ -4,6 +4,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Shapes;
 using Windows.UI;
+using Path = System.IO.Path;
 
 namespace Matriz;
 
@@ -49,7 +50,7 @@ public sealed class SettingsWindow : Window
         if (wallpaper != null) return;
         var candidate = new WallpaperWindow(settings); candidate.Error += ShowError;
         try { await candidate.StartAsync(); wallpaper = candidate; Activate(); }
-        catch (Exception error) { ShowError(error.Message + " · " + "Check Microsoft Edge WebView2 Runtime and Explorer."); }
+        catch (Exception error) { candidate.Close(); ShowError(error.Message + " · " + "Check Microsoft Edge WebView2 Runtime and Explorer."); }
     }
     private void Tick()
     {

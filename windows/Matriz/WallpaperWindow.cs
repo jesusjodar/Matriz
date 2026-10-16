@@ -45,8 +45,7 @@ public sealed class WallpaperWindow : Window
             } catch (JsonException error) { Error?.Invoke(error.Message); }
         };
         browser.Source = new Uri("https://matriz.local/index.html");
-        try { worker = Desktop.Attach(this); }
-        catch { Close(); throw; }
+        worker = Desktop.Attach(this);
     }
     public void Maintain()
     {
