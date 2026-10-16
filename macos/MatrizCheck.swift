@@ -496,9 +496,11 @@ enum MatrizCheck {
         hidden.waveOpacity = 0
         hidden.sparkleOpacity = 0
         let black = try frame(0, settings: hidden, audio: SIMD4(repeating: 1))
-        precondition(stride(from: 0, to: black.count, by: 4).allSatisfy {
-            black[$0] == 0 && black[$0 + 1] == 0 && black[$0 + 2] == 0 && black[$0 + 3] == 255
-        }, "Las opacidades cero no ocultan la superficie.")
+        let allBlack = stride(from: 0, to: black.count, by: 4).allSatisfy { (index: Int) -> Bool in
+            let rgb = black[index] == 0 && black[index + 1] == 0 && black[index + 2] == 0
+            return rgb && black[index + 3] == 255
+        }
+        precondition(allBlack, "Las opacidades cero no ocultan la superficie.")
         var moving = MatrizSettings()
         moving.depthConcavity = 1
         moving.deformation = 1
@@ -585,9 +587,10 @@ enum MatrizCheck {
             composition.backgroundStyle = style; composition.sparkleOpacity = 0
             let idle = try frame(2, settings: composition)
             let bass = try frame(2, settings: composition, audio: SIMD4(1, 0, 0, 1))
-            let changedBoundary = stride(from: 0, to: idle.count, by: 4).filter {
-                (Int(idle[$0]) + Int(idle[$0+1]) + Int(idle[$0+2]) == 0)
-                != (Int(bass[$0]) + Int(bass[$0+1]) + Int(bass[$0+2]) == 0)
+            let changedBoundary = stride(from: 0, to: idle.count, by: 4).filter { (index: Int) -> Bool in
+                let wasBlack = idle[index] == 0 && idle[index + 1] == 0 && idle[index + 2] == 0
+                let isBlack = bass[index] == 0 && bass[index + 1] == 0 && bass[index + 2] == 0
+                return wasBlack != isBlack
             }.count
             precondition(changedBoundary > 1000, "La música no cambia el contorno de la composición \(style).")
             if style >= 4 {

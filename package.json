@@ -1,7 +1,7 @@
 {
   "name": "matriz",
   "private": true,
-  "version": "2.2.0",
+  "version": "2.3.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,7 +12,7 @@
     "macos:check": "node scripts/build-macos.mjs --check",
     "macos:install": "node scripts/build-macos.mjs --install",
     "web:build": "vite build --config packages/web/vite.config.mjs",
-    "web:pack": "npm run web:build && node -e \"require('fs').mkdirSync('build',{recursive:true})\" && npm pack ./packages/web --pack-destination build",
+    "web:pack": "npm run web:build && node -e \"require('fs').mkdirSync('build',{recursive:true})\" && npm pack ./packages/web --pack-destination build && node scripts/package-web.mjs",
     "windows:prepare": "node scripts/prepare-windows.mjs",
     "test:browser": "playwright test"
   },

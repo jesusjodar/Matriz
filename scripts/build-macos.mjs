@@ -12,7 +12,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const output = join(homedir(), 'Library/Application Support/Matriz/Build')
 const run = (command, args) => execFileSync(command, args, { stdio: 'inherit', cwd: root })
 const version = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).version
-const buildNumber = '9'
+const buildNumber = '10'
 const icons = join(output, 'Icons')
 mkdirSync(icons, { recursive: true })
 // The hosted Xcode 26 compiler cannot read the Xcode 27 Icon Composer format; local release builds validate it.

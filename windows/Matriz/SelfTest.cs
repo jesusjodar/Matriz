@@ -20,10 +20,11 @@ internal static class SelfTest
             Check(new SettingsStore(Path.Combine(folder, "settings.json")).Number("hue") == 173, "Persistence");
             var hooks = new[] { ("codex", "PermissionRequest", "permission"), ("claude", "StopFailure", "error"), ("opencode", "session.execution.started", "running"), ("hermes", "post_llm_call", "completed") };
             foreach (var (provider, kind, state) in hooks) Check(Agents.Map(provider, new JsonObject { ["hook_event_name"] = kind, ["type"] = kind }) == state, "Hook " + provider);
+            Check(Agents.Map("hermes", new JsonObject { ["hook_event_name"] = "on_human_input_request", ["extra"] = new JsonObject { ["kind"] = "approval" } }) == "permission", "Hermes approval parity");
             Agents.Write("codex", "private-session", "permission", folder); Agents.Write("generic", "test", "running", folder);
             Check(Agents.Latest("all", folder) == "permission" && Agents.Latest("generic", folder) == "running", "Agent priorities");
             Check(Agents.ID("codex", "private-session").Length == 64, "Hashed session IDs");
-            foreach (var file in new[] { "Web/index.html", "Web/host.js", "Web/matriz-background.js", "strings.json" }) Check(File.Exists(Path.Combine(SettingsStore.Assets, file)), "Missing asset " + file);
+            foreach (var file in new[] { "Web/index.html", "Web/host.js", "strings.json" }) Check(File.Exists(Path.Combine(SettingsStore.Assets, file)), "Missing asset " + file);
             File.WriteAllText(report, new JsonObject { ["success"] = true, ["checks"] = "settings, validation, persistence, hooks, priorities, hashing, assets" }.ToJsonString());
             return 0;
         } catch (Exception error) { File.WriteAllText(report, new JsonObject { ["success"] = false, ["error"] = error.ToString() }.ToJsonString()); return 1; }

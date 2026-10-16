@@ -30,7 +30,7 @@ Los cambios se aplican asignando `element.settings = { ...valores }`; los valore
 ## Con un proyecto npm
 
 ```sh
-npm install ./matriz-background-2.2.0.tgz
+npm install ./matriz-background-2.3.0.tgz
 ```
 
 ```js

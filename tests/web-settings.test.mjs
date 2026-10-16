@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { settingsSchema, defaultSettings, sanitizeSettings, frameUniforms, manualPalette } from '../packages/web/src/settings.mjs'
-import { extractPixels } from '../packages/web/src/colors.mjs'
+import { extractPixels } from '../windows/web/colors.mjs'
 
 test('visual settings validate input and exclude native integrations', () => {
   const clean=sanitizeSettings({size:100,brightness:true,palette:2.6,hue:-5,customLight:[-.1,.5,2],agentEnabled:true})

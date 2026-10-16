@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace Matriz;
@@ -35,10 +36,10 @@ public sealed class SettingsStore
             var value = input?[key]; var fallback = basis?[key] ?? spec["default"];
             JsonNode? clean = fallback?.DeepClone();
             if (spec["kind"]!.GetValue<string>() == "boolean" && value is JsonValue boolean && boolean.TryGetValue<bool>(out _)) clean = value.DeepClone();
-            if (spec["kind"]!.GetValue<string>() == "color" && value is JsonArray colors && colors.Count == 3 && colors.All(x => x is JsonValue v && v.TryGetValue<double>(out var n) && double.IsFinite(n)))
-                clean = new JsonArray(colors.Select(x => (JsonNode?)JsonValue.Create(Math.Clamp(x!.GetValue<double>(), 0, 1))).ToArray());
+            if (spec["kind"]!.GetValue<string>() == "color" && value is JsonArray colors && colors.Count == 3 && colors.All(x => TryNumber(x, out _)))
+                clean = new JsonArray(colors.Select(x => { TryNumber(x, out var n); return (JsonNode?)JsonValue.Create(Math.Clamp(n, 0, 1)); }).ToArray());
             if (key == "agentSource" && value is JsonValue source && source.TryGetValue<string>(out var name) && spec["choices"]!.AsArray().Any(x => x!.GetValue<string>() == name)) clean = value.DeepClone();
-            if (spec.ContainsKey("min") && value is JsonValue number && number.TryGetValue<double>(out var v) && double.IsFinite(v))
+            if (spec.ContainsKey("min") && TryNumber(value, out var v))
             {
                 v = Math.Clamp(v, spec["min"]!.GetValue<double>(), spec["max"]!.GetValue<double>());
                 if (spec["kind"]!.GetValue<string>() == "choice" || key == "artworkColors") v = Math.Round(v, MidpointRounding.AwayFromZero);
@@ -47,6 +48,12 @@ public sealed class SettingsStore
             result[key] = clean;
         }
         return result;
+    }
+    private static bool TryNumber(JsonNode? node, out double number)
+    {
+        number = 0;
+        return node is JsonValue value && double.TryParse(value.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out number)
+            && double.IsFinite(number) && value.GetValueKind() == JsonValueKind.Number;
     }
     public void Set(string key, JsonNode? value)
     {

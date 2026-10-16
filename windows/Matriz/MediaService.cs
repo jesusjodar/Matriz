@@ -24,7 +24,7 @@ public sealed class MediaService : IDisposable
     private SettingsStore? settings;
     public MediaService(Action<string> error, Action<object> send) { this.error = error; this.send = send; }
     private static double Now => Stopwatch.GetTimestamp() / (double)Stopwatch.Frequency;
-    public void ArmAudio() { armed = true; }
+    public void ArmAudio() { StopAudio(); armed = true; }
     public void Update(SettingsStore value) { settings = value; SetActive(active, value); }
     public void SetActive(bool value, SettingsStore settings)
     {

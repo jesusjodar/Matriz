@@ -24,6 +24,8 @@ jobs:
           name: Matriz-Web
           path: |
             build/*.tgz
+            build/Matriz-Web-*.zip
+            build/SHA256SUMS-Web
             packages/web/dist/
             packages/web/README.md
             packages/web/example.html

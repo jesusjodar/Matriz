@@ -54,7 +54,7 @@ public static class Agents
         if (provider == "hermes") return kind switch {
             "on_session_start" or "on_session_finalize" or "agent_loop_stopped" => "idle",
             "pre_llm_call" or "pre_tool_call" or "post_tool_call" or "post_approval_response" or "on_human_input_resolved" => "running",
-            "pre_approval_request" => "permission", "on_human_input_request" => "input", "post_llm_call" => "completed",
+            "pre_approval_request" => "permission", "on_human_input_request" => p["extra"]?["kind"]?.GetValue<string>() == "approval" ? "permission" : "input", "post_llm_call" => "completed",
             "on_session_end" => p["extra"]?["failed"]?.GetValue<bool>() == true ? "error" : p["extra"]?["completed"]?.GetValue<bool>() == true ? "completed" : "idle", _ => null };
         if (provider == "opencode") return kind switch {
             "session.created" or "session.deleted" or "session.execution.interrupted" => "idle",

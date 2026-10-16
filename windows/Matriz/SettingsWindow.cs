@@ -100,7 +100,7 @@ public sealed class SettingsWindow : Window
             content.Children.Add(border);
         }
         if (group == "Music") {
-            var audio = new Button { Content = SettingsStore.Text("Activate audio") };
+            var audio = new Button { Content = SettingsStore.Text("Activate or retry audio") };
             audio.Click += (_, _) => { media.ArmAudio(); media.SetActive(!paused, settings); }; content.Children.Add(audio);
             var artwork = new Button { Content = SettingsStore.Text("Authorize open players") };
             artwork.Click += async (_, _) => await media.ConnectArtwork(); content.Children.Add(artwork);

@@ -1,6 +1,6 @@
 import { createMatriz } from '../../packages/web/src/renderer.mjs'
 import { manualPalette } from '../../packages/web/src/settings.mjs'
-import { toLab, fromLab, mixColor, extractArtwork } from '../../packages/web/src/colors.mjs'
+import { toLab, fromLab, mixColor, extractArtwork } from './colors.mjs'
 
 const colors={idle:[.38,.42,.48],running:[.12,.48,.95],permission:[1,.60,.08],input:[.68,.35,.95],error:[.96,.15,.22],completed:[.12,.82,.43]}
 const linear=x => x<=.04045 ? x/12.92 : ((x+.055)/1.055)**2.4
