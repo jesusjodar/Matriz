@@ -16,6 +16,15 @@ internal static class SelfTest
             var invalid = SettingsStore.Sanitize(new JsonObject { ["size"] = 100, ["brightness"] = true, ["agentSource"] = "unknown", ["customLight"] = new JsonArray(-1d, .5, 5d) });
             Check(invalid["size"]!.GetValue<double>() == 1.4 && invalid["brightness"]!.GetValue<double>() == 1 && invalid["agentSource"]!.GetValue<string>() == "all", "Validation");
             Check(invalid["customLight"]!.ToJsonString() == "[0,0.5,1]", "Color bounds");
+            var nonNumbers = SettingsStore.Sanitize(new JsonObject { ["brightness"] = "2", ["contrast"] = double.NaN });
+            Check(nonNumbers["brightness"]!.GetValue<double>() == 1 && nonNumbers["contrast"]!.GetValue<double>() == 1, "Reject strings and non-finite numbers");
+            var culture = System.Globalization.CultureInfo.CurrentUICulture;
+            try {
+                System.Globalization.CultureInfo.CurrentUICulture = new System.Globalization.CultureInfo("zh-CN");
+                var simplified = SettingsStore.Text("Appearance");
+                System.Globalization.CultureInfo.CurrentUICulture = new System.Globalization.CultureInfo("zh-TW");
+                Check(simplified != "Appearance" && SettingsStore.Text("Appearance") != simplified, "Chinese locale variants");
+            } finally { System.Globalization.CultureInfo.CurrentUICulture = culture; }
             var store = new SettingsStore(Path.Combine(folder, "settings.json")); store.Set("hue", JsonValue.Create(173d));
             Check(new SettingsStore(Path.Combine(folder, "settings.json")).Number("hue") == 173, "Persistence");
             var hooks = new[] { ("codex", "PermissionRequest", "permission"), ("claude", "StopFailure", "error"), ("opencode", "session.execution.started", "running"), ("hermes", "post_llm_call", "completed") };

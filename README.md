@@ -5,13 +5,13 @@
 <h1 align="center">Matriz</h1>
 
 <p align="center">
-  <strong>Un fondo procedural para macOS:</strong> ondas de luz, destellos geométricos y color que reacciona a tu música.
+  <strong>Un fondo procedural para macOS, Windows y web:</strong> ondas de luz, destellos geométricos y color orgánico.
 </p>
 
 <p align="center">
   <img alt="macOS 14+" src="https://img.shields.io/badge/macOS-14%2B-1d1d1f?logo=apple&logoColor=white">
   <img alt="Apple Silicon" src="https://img.shields.io/badge/Apple_Silicon-arm64-4a90d9?logo=apple&logoColor=white">
-  <img alt="Versión 2.2.0" src="https://img.shields.io/badge/versi%C3%B3n-2.2.0-7a5cf0">
+  <img alt="Versión 2.3.0" src="https://img.shields.io/badge/versi%C3%B3n-2.3.0-7a5cf0">
   <img alt="Idiomas 20" src="https://img.shields.io/badge/idiomas-20-2ea44f">
 </p>
 
@@ -25,7 +25,7 @@ Matriz dibuja detrás de los iconos del escritorio, en todas las pantallas. Un c
 
 ## Windows y componente web
 
-Matriz también dispone de una [aplicación Windows con ajustes nativos WinUI 3](windows/README.md) para x64 y ARM64 y un [componente web listo para integrar](packages/web/README.md). Los paquetes se generan en el [flujo multiplataforma](https://github.com/jesusjodar/Matriz/actions/workflows/multiplatform.yml), en sus artefactos de cada compilación correcta.
+Matriz también dispone de una [aplicación Windows con ajustes nativos WinUI 3](windows/README.md) para x64 y ARM64 y un [componente web listo para integrar](packages/web/README.md). Descarga los [paquetes de la versión 2.3.0](https://github.com/jesusjodar/Matriz/releases/tag/v2.3.0): [Windows x64](https://github.com/jesusjodar/Matriz/releases/download/v2.3.0/Matriz-Windows-x64.zip), [Windows ARM64](https://github.com/jesusjodar/Matriz/releases/download/v2.3.0/Matriz-Windows-ARM64.zip), [web sin herramientas de compilación](https://github.com/jesusjodar/Matriz/releases/download/v2.3.0/Matriz-Web-2.3.0.zip) o [paquete npm local](https://github.com/jesusjodar/Matriz/releases/download/v2.3.0/matriz-background-2.3.0.tgz). Los cambios siguientes también se comprueban en el [flujo multiplataforma](https://github.com/jesusjodar/Matriz/actions/workflows/multiplatform.yml).
 
 La web es exclusivamente visual: **sin música, IA ni ajustes visibles**. Configura los valores directamente en JavaScript o en el atributo `settings`. Incluye un [ejemplo completo](packages/web/example.html), tipos TypeScript, módulos ESM y un script clásico.
 
@@ -117,13 +117,13 @@ Matriz también respeta **Reducir movimiento** de macOS, que deja una imagen fij
 Descarga el archivo desde la [página de releases](https://github.com/jesusjodar/Matriz/releases) y comprueba su integridad:
 
 ```sh
-curl --fail --location -o Matriz-2.2.0.zip https://github.com/jesusjodar/Matriz/releases/download/v2.2.0/Matriz-2.2.0.zip
+curl --fail --location -o Matriz-2.3.0.zip https://github.com/jesusjodar/Matriz/releases/download/v2.3.0/Matriz-2.3.0.zip
 
-curl --fail --location -o SHA256SUMS https://github.com/jesusjodar/Matriz/releases/download/v2.2.0/SHA256SUMS
-shasum -a 256 -c SHA256SUMS
-# Debe mostrar: Matriz-2.2.0.zip: OK
+curl --fail --location -o SHA256SUMS https://github.com/jesusjodar/Matriz/releases/download/v2.3.0/SHA256SUMS
+shasum -a 256 -c SHA256SUMS --ignore-missing
+# Debe mostrar: Matriz-2.3.0.zip: OK
 # SHA-256:
-# 026a3d3df7bd808b000f59fbfddb00c0dd09fbf62bdc5383d824dd13facc762a
+# e3eed67d35919266bf96874aefe633913e072b33ca4a32c99bba7cbd4067aa8a
 ```
 
 ### Quitar la cuarentena de macOS
@@ -131,7 +131,7 @@ shasum -a 256 -c SHA256SUMS
 Matriz está firmada localmente y no está notarizada por Apple, así que macOS marca la descarga como en cuarentena. Retírala con un comando antes de abrirla (si no, verás «no se puede abrir» o «está dañada»):
 
 ```sh
-unzip -q Matriz-2.2.0.zip
+unzip -q Matriz-2.3.0.zip
 xattr -dr com.apple.quarantine Matriz.app Matriz.saver
 ```
 
@@ -148,7 +148,7 @@ open ~/Applications/Matriz.app
 
 ### Actualizar desde una versión anterior
 
-Consulta los [comandos completos de la versión 2.2.0](docs/releases/v2.2.0.md#instalar-o-actualizar-y-retirar-la-cuarentena): guardan los bundles anteriores como copia de seguridad antes de sustituirlos. Las preferencias existentes se conservan.
+Consulta los [comandos completos de la versión 2.3.0](docs/releases/v2.3.0.md#instalar-o-actualizar-y-retirar-la-cuarentena): guardan los bundles anteriores como copia de seguridad antes de sustituirlos. Las preferencias existentes se conservan.
 
 ## Primeros pasos
 

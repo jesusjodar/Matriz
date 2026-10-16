@@ -24,6 +24,7 @@ public sealed class SettingsStore
     public static string Text(string key)
     {
         var language = CultureInfo.CurrentUICulture.Name;
+        if (language.StartsWith("zh", StringComparison.OrdinalIgnoreCase)) language = language.Contains("Hant") || language.Contains("TW") || language.Contains("HK") || language.Contains("MO") ? "zh-Hant" : "zh-Hans";
         if (!Strings.ContainsKey(language)) language = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
         return Strings[language]?[key]?.GetValue<string>() ?? Strings["en"]?[key]?.GetValue<string>() ?? key;
     }
@@ -52,6 +53,7 @@ public sealed class SettingsStore
     private static bool TryNumber(JsonNode? node, out double number)
     {
         number = 0;
+        if (node is JsonValue direct && direct.TryGetValue<double>(out number)) return double.IsFinite(number);
         return node is JsonValue value && double.TryParse(value.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out number)
             && double.IsFinite(number) && value.GetValueKind() == JsonValueKind.Number;
     }

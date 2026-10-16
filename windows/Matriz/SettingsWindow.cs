@@ -28,7 +28,8 @@ public sealed class SettingsWindow : Window
         AppWindow.Resize(new Windows.Graphics.SizeInt32(840, 820));
         handle = WinRT.Interop.WindowNative.GetWindowHandle(this);
         media = new MediaService(message => ShowError(message), message => wallpaper?.Send(message));
-        var root = new Grid(); root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto }); root.RowDefinitions.Add(new RowDefinition());
+        var root = new Grid { FlowDirection = System.Globalization.CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft ? FlowDirection.RightToLeft : FlowDirection.LeftToRight };
+        root.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto }); root.RowDefinitions.Add(new RowDefinition());
         root.Children.Add(status); Grid.SetRow(navigation, 1); root.Children.Add(navigation);
         navigation.Content = new ScrollViewer { Content = content, HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled };
         foreach (var group in SettingsStore.Schema.Select(x => x!["group"]!.GetValue<string>()).Distinct()) navigation.MenuItems.Add(new NavigationViewItem { Content = SettingsStore.Text(group), Tag = group });

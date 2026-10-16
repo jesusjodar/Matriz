@@ -11,6 +11,12 @@ test('visual settings validate input and exclude native integrations', () => {
   assert.ok(settingsSchema.settings.every(x=>!['Music','AI agents'].includes(x.group)))
   const copy=sanitizeSettings();copy.customLight[0]=1;assert.notEqual(defaultSettings.customLight[0],1)
 })
+test('desktop and web releases keep a common version', () => {
+  const read=path=>readFileSync(new URL(path,import.meta.url),'utf8')
+  const version=JSON.parse(read('../package.json')).version
+  assert.equal(JSON.parse(read('../packages/web/package.json')).version,version)
+  assert.equal(read('../windows/Matriz/Matriz.csproj').match(/<Version>(.*?)<\/Version>/)[1],version)
+})
 test('uniform contract initializes GLSL and matches native volume and phase math', () => {
   const s=sanitizeSettings(),frame=frameUniforms(s,1440,900,1.5,2)
   const shader=readFileSync(new URL('../src/sparkles.frag',import.meta.url),'utf8')
