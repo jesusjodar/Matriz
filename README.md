@@ -11,7 +11,7 @@
 <p align="center">
   <img alt="macOS 14+" src="https://img.shields.io/badge/macOS-14%2B-1d1d1f?logo=apple&logoColor=white">
   <img alt="Apple Silicon" src="https://img.shields.io/badge/Apple_Silicon-arm64-4a90d9?logo=apple&logoColor=white">
-  <img alt="Versión 2.0.0" src="https://img.shields.io/badge/versi%C3%B3n-2.0.0-7a5cf0">
+  <img alt="Versión 2.1.0" src="https://img.shields.io/badge/versi%C3%B3n-2.1.0-7a5cf0">
   <img alt="Idiomas 20" src="https://img.shields.io/badge/idiomas-20-2ea44f">
 </p>
 
@@ -56,9 +56,11 @@ En **Apariencia → Composición** puedes elegir entre seis estilos. Sus bordes 
 
 | | |
 |:---:|:---:|
-| ![Pantalla completa](docs/images/estilo-1-pantalla-completa.png) <br> **Pantalla completa** — el estilo inicial: ondas y destellos llenan todo el fondo. | ![Onda inferior](docs/images/estilo-2-onda-inferior.png) <br> **Onda inferior** — centro más bajo y laterales elevados, con borde orgánico. |
+| ![Pantalla completa](docs/images/estilo-1-pantalla-completa.png) <br> **Pantalla completa** — ondas y destellos llenan todo el fondo. | ![Onda inferior](docs/images/estilo-2-onda-inferior.png) <br> **Onda inferior** — el estilo inicial: centro más bajo y laterales elevados, con borde orgánico. |
 | ![Onda superior](docs/images/estilo-3-onda-superior.png) <br> **Onda superior** — la composición inversa de la onda inferior. | ![Onda central](docs/images/estilo-4-onda-central.png) <br> **Onda central** — una franja horizontal de bordes cambiantes. |
-| ![Orbe](docs/images/estilo-5-orbe.png) <br> **Orbe** — una forma redondeada con contorno difuminado, escalable del 20 % al 600 %. | ![Orbe inverso](docs/images/estilo-6-orbe-inverso.png) <br> **Orbe inverso** — un hueco central con las mismas características y control de tamaño. |
+| ![Orbe](docs/images/estilo-5-orbe.png) <br> **Orbe** — una forma redondeada con contorno difuminado, escalable del 20 % al 600 % y con centro desplazable. | ![Orbe inverso](docs/images/estilo-6-orbe-inverso.png) <br> **Orbe inverso** — un hueco central con las mismas características y controles de posición y tamaño. |
+
+La **posición de la onda** se ajusta en los estilos inferior, superior y central (hacia arriba o hacia abajo); en los orbes se ajusta el **centro** en ambos ejes.
 
 En **Destellos → Forma de las partículas** eliges estrellas, círculos o cuadrados. Los controles de concavidad solo aparecen con las estrellas y sus valores se conservan al cambiar de figura.
 
@@ -70,7 +72,7 @@ Al abrir Matriz desde Finder aparece su panel, con controles nativos y ocho grup
 |:---:|:---:|
 | <img src="docs/images/panel-apariencia.png" width="340" alt="Panel de ajustes: Apariencia"> | <img src="docs/images/panel-musica.png" width="340" alt="Panel de ajustes: Música y portadas"> |
 
-- **Apariencia** — composición, paleta (o colores de portada), variedad de tonos, matiz, brillo, saturación, contraste, forma de las partículas, densidad, tamaño y opacidades.
+- **Apariencia** — composición, posición de la onda y del orbe, paleta (o colores de portada), variedad de tonos, matiz, brillo, saturación, contraste, forma de las partículas, densidad, tamaño y opacidades.
 - **Movimiento** — ritmo, tamaño de las ondas y desplazamiento de las partículas.
 - **Comportamiento** — profundidad, tamaño según la profundidad y concavidad dinámica de las estrellas.
 - **Música** — reacción al audio del Mac (sensibilidad, intensidad, suavidad) y colores de portada.
@@ -94,11 +96,11 @@ Matriz también respeta **Reducir movimiento** de macOS, que deja una imagen fij
 Descarga el archivo desde la [página de releases](https://github.com/jesusjodar/Matriz/releases) y comprueba su integridad:
 
 ```sh
-curl -L -o Matriz-2.0.0.zip https://github.com/jesusjodar/Matriz/releases/download/v2.0.0/Matriz-2.0.0.zip
+curl -L -o Matriz-2.1.0.zip https://github.com/jesusjodar/Matriz/releases/download/v2.1.0/Matriz-2.1.0.zip
 
-shasum -a 256 Matriz-2.0.0.zip
+shasum -a 256 Matriz-2.1.0.zip
 # Debe mostrar:
-# 9066fa0a57ab41cdd6a55956bbede342ed3f9a9ee827c47c4e9af24d17d50d38
+# 883bdb1695f9ea0579c712edf056ee69d79923b634cf4caa12698a195945f1c5
 ```
 
 ### Quitar la cuarentena de macOS
@@ -106,7 +108,7 @@ shasum -a 256 Matriz-2.0.0.zip
 Matriz está firmada localmente y no está notarizada por Apple, así que macOS marca la descarga como en cuarentena. Retírala con un comando antes de abrirla (si no, verás «no se puede abrir» o «está dañada»):
 
 ```sh
-unzip -q Matriz-2.0.0.zip
+unzip -q Matriz-2.1.0.zip
 xattr -dr com.apple.quarantine Matriz.app Matriz.saver
 ```
 
@@ -124,8 +126,8 @@ open ~/Applications/Matriz.app
 ### Todo en un solo comando
 
 ```sh
-curl -L -o Matriz-2.0.0.zip https://github.com/jesusjodar/Matriz/releases/download/v2.0.0/Matriz-2.0.0.zip \
-  && unzip -q Matriz-2.0.0.zip \
+curl -L -o Matriz-2.1.0.zip https://github.com/jesusjodar/Matriz/releases/download/v2.1.0/Matriz-2.1.0.zip \
+  && unzip -q Matriz-2.1.0.zip \
   && xattr -dr com.apple.quarantine Matriz.app Matriz.saver \
   && mkdir -p ~/Applications "$HOME/Library/Screen Savers" \
   && cp -R Matriz.app ~/Applications/ \

@@ -1,4 +1,5 @@
 import AppKit
+import CryptoKit
 import MetalKit
 import ScreenSaver
 
@@ -76,24 +77,27 @@ enum MatrizCheck {
     static func checkSettingsAndClock() {
         let invalid = MatrizSettings(["speed": Double.nan, "brightness": Double.infinity, "contrast": -100,
             "palette": 50, "hue": Double.nan, "spacing": 0, "size": 900, "volumeScale": "1.5", "quality": -1, "concavity": true])
-        precondition(invalid.speed == 1 && invalid.brightness == 1 && invalid.contrast == 0.5)
+        precondition(invalid.speed == 1.50166015625 && invalid.brightness == 1 && invalid.contrast == 0.5)
         precondition(invalid.palette == 8 && invalid.hue == 0 && invalid.spacing == 6 && invalid.size == 1.4)
         precondition(MatrizSettings(["hue": -30]).hue == 0 && MatrizSettings(["hue": 400]).hue == 360)
-        precondition(invalid.volumeScale == 1 && invalid.quality == 0 && invalid.concavity == 0.78)
+        precondition(invalid.volumeScale == 0.6 && invalid.quality == 0 && invalid.concavity == 0.78)
         let newSettings = MatrizSettings(["audioEnabled": 1, "audioSensitivity": Double.nan,
             "audioIntensity": 20, "audioResponse": -1, "artworkEnabled": "true", "artworkSource": -3,
             "artworkIntensity": Double.infinity, "artworkTransition": 0])
-        precondition(!newSettings.audioEnabled && newSettings.audioSensitivity == 6 && newSettings.audioIntensity == 1)
-        precondition(newSettings.audioResponse == 0 && !newSettings.artworkEnabled)
+        precondition(newSettings.audioEnabled && newSettings.audioSensitivity == 0.3258231026785712
+                          && newSettings.audioIntensity == 1)
+        precondition(newSettings.audioResponse == 0 && newSettings.artworkEnabled)
         precondition(newSettings.artworkIntensity == 1 && newSettings.artworkTransition == 1)
-        precondition(!MatrizSettings(["palette": 4]).audioEnabled && !MatrizSettings(["palette": 4]).artworkEnabled)
+        precondition(MatrizSettings(["settingsVersion": 2, "artworkIntensity": Double.infinity]).artworkIntensity == 2,
+                     "El valor nuevo por defecto de la intensidad de portada no se aplica.")
+        precondition(MatrizSettings(["palette": 4]).audioEnabled && MatrizSettings(["palette": 4]).artworkEnabled)
         let appearance = MatrizSettings(["waveOpacity": -2, "sparkleOpacity": 9, "waveSizeInfluence": 9,
             "depthConcavityEnabled": 1, "depthConcavity": true, "deformation": Double.nan, "backgroundStyle": 99, "orbSize": Double.infinity, "sparkleShape": -7,
             "paletteRichness": -3, "paletteVariation": 3, "saturation": Double.infinity,
             "vibrance": -4, "colorContrast": 9, "hdrEnabled": "true", "artworkColors": 99,
             "customDeep": [Double.nan, 0, 0], "customLight": [-1, 0.3, 9], "customSoft": [true, false, true]])
         precondition(appearance.waveOpacity == 0 && appearance.sparkleOpacity == 1 && appearance.waveSizeInfluence == 3)
-        precondition(appearance.depthConcavity == 0 && appearance.deformation == 0.45)
+        precondition(appearance.depthConcavity == 0 && appearance.deformation == 4)
         precondition(appearance.backgroundStyle == 5 && appearance.orbSize == 1 && appearance.sparkleShape == 0)
         precondition(MatrizSettings(["orbSize": -2, "deformation": 99]).orbSize == 0.2 && MatrizSettings(["deformation": 99]).deformation == 4)
         precondition(appearance.paletteRichness == 0 && appearance.saturation == 1)
@@ -137,7 +141,240 @@ enum MatrizCheck {
         let a = MatrizClock.phase(1_000_000_000, rate: 0.5175)
         let b = MatrizClock.phase(1_000_000_000 + 1.0 / 60, rate: 0.5175)
         precondition(abs(Double(b - a) - 0.5175 / 60) < 0.00001, "Se pierde precisión a largo plazo.")
-        precondition(MemoryLayout<MatrizUniforms>.stride == 224, "Layout de uniforms incompatible con Metal.")
+        precondition(MemoryLayout<MatrizUniforms>.stride == 240, "Layout de uniforms incompatible con Metal.")
+    }
+
+    struct BatteryCase {
+        var id: String
+        var time: Double = 0
+        var pixelRatio: Float = 1
+        var width: Int = 1440
+        var height: Int = 900
+        var audio: SIMD4<Float> = .zero
+        var artwork: MatrizArtworkColors?
+        var configure: (inout MatrizSettings) -> Void = { _ in }
+    }
+
+    static func sha256Hex(_ data: Data) -> String {
+        SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+    }
+
+    static func runBattery(app: Bundle, output: String) throws {
+        let renderer = try MatrizRenderer(bundle: app)
+        var textures: [String: MTLTexture] = [:]
+        func texture(width: Int, height: Int) -> MTLTexture {
+            let key = "\(width)x\(height)"
+            if let cached = textures[key] { return cached }
+            let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba8Unorm, width: width, height: height, mipmapped: false)
+            descriptor.usage = [.renderTarget]
+            descriptor.storageMode = .shared
+            let created = renderer.device.makeTexture(descriptor: descriptor)!
+            textures[key] = created
+            return created
+        }
+        var cases: [BatteryCase] = []
+        for style in 0...5 {
+            cases.append(BatteryCase(id: "estilo-\(style)-t0", configure: { $0.backgroundStyle = style }))
+        }
+        for style in 1...5 {
+            cases.append(BatteryCase(id: "estilo-\(style)-t2.6", time: 2.6, configure: { $0.backgroundStyle = style }))
+        }
+        for style in 1...3 {
+            cases.append(BatteryCase(id: "estilo-\(style)-onda-desplazada", configure: {
+                $0.backgroundStyle = style
+                $0.wavePosition = 0.25
+            }))
+        }
+        cases.append(BatteryCase(id: "orbe-desplazado", configure: {
+            $0.backgroundStyle = 4
+            $0.orbX = 0.3
+            $0.orbY = -0.2
+        }))
+        for (style, orb) in [(4, 0.2), (4, 6.0), (5, 0.2), (5, 6.0)] {
+            cases.append(BatteryCase(id: "estilo-\(style)-orbe-\(orb)", configure: {
+                $0.backgroundStyle = style
+                $0.orbSize = orb
+            }))
+        }
+        for deformation in [0.0, 1.0, 2.0, 4.0] {
+            cases.append(BatteryCase(id: "deformacion-\(deformation)", time: 2, configure: { $0.deformation = deformation }))
+        }
+        cases.append(BatteryCase(id: "deformacion-4-orbe", time: 2, configure: {
+            $0.deformation = 4
+            $0.backgroundStyle = 4
+        }))
+        for spacing in [6.0, 12.0, 16.0] {
+            cases.append(BatteryCase(id: "espaciado-\(spacing)", configure: { $0.spacing = spacing }))
+        }
+        for shape in 0...2 {
+            cases.append(BatteryCase(id: "geometria-\(shape)-extremo", time: 2, configure: {
+                $0.deformation = 4
+                $0.spacing = 6
+                $0.size = 1.4
+                $0.volumeScale = 0.6
+                $0.sparkleShape = shape
+            }))
+        }
+        for size in [0.6, 1.4] {
+            cases.append(BatteryCase(id: "tamano-\(size)", configure: { $0.size = size }))
+        }
+        for volume in [0.1, 1.8] {
+            cases.append(BatteryCase(id: "volumen-\(volume)", configure: { $0.volumeScale = volume }))
+        }
+        for shape in 1...2 {
+            cases.append(BatteryCase(id: "forma-\(shape)", configure: { $0.sparkleShape = shape }))
+        }
+        cases.append(BatteryCase(id: "forma-1-sin-concavidad", configure: {
+            $0.sparkleShape = 1
+            $0.concavity = 0
+            $0.depthConcavity = 1
+        }))
+        for saturation in [0.0, 2.0] {
+            cases.append(BatteryCase(id: "saturacion-\(saturation)", configure: { $0.saturation = saturation }))
+        }
+        for contrast in [0.5, 2.0] {
+            cases.append(BatteryCase(id: "contraste-color-\(contrast)", configure: { $0.colorContrast = contrast }))
+        }
+        cases.append(BatteryCase(id: "sin-destellos", configure: { $0.sparkleOpacity = 0 }))
+        cases.append(BatteryCase(id: "sin-destellos-orbe", configure: {
+            $0.sparkleOpacity = 0
+            $0.backgroundStyle = 4
+        }))
+        cases.append(BatteryCase(id: "solo-destellos", configure: { $0.waveOpacity = 0 }))
+        cases.append(BatteryCase(id: "audio-t0", audio: SIMD4(1, 0, 1, 1)))
+        cases.append(BatteryCase(id: "audio-orbe-deformado", time: 1.3, audio: SIMD4(0.3, 0.7, 0.5, 0.6), configure: {
+            $0.backgroundStyle = 4
+            $0.deformation = 2
+        }))
+        cases.append(BatteryCase(id: "dpr-1.5", time: 2, pixelRatio: 1.5, configure: { $0.deformation = 4 }))
+        cases.append(BatteryCase(id: "dpr-2", time: 2, pixelRatio: 2, configure: { $0.deformation = 4 }))
+        cases.append(BatteryCase(id: "pequena-800x600", time: 0.7, pixelRatio: 1.5, width: 800, height: 600, configure: {
+            $0.backgroundStyle = 5
+            $0.deformation = 4
+        }))
+        let cover = MatrizArtworkColors(primary: SIMD4(1, 0, 0, 0.8), secondary: SIMD4(0, 0, 1, 1),
+                                        tertiary: SIMD4(0, 1, 0, 1), quaternary: SIMD4(1, 1, 0, 1))
+        cases.append(BatteryCase(id: "portada", artwork: cover))
+
+        var lines: [String] = []
+        do {
+            let target = texture(width: 1440, height: 900)
+            let command = try renderer.render(texture: target, time: 0, pixelRatio: 1, settings: MatrizSettings())
+            command.waitUntilCompleted()
+        }
+        for item in cases {
+            var settings = MatrizSettings()
+            item.configure(&settings)
+            let start = CFAbsoluteTimeGetCurrent()
+            let target = texture(width: item.width, height: item.height)
+            let command = try renderer.render(texture: target, time: item.time, pixelRatio: item.pixelRatio,
+                                              settings: settings, audio: item.audio, artworkPalette: item.artwork)
+            command.waitUntilCompleted()
+            if let error = command.error { throw error }
+            precondition(command.status == .completed, "Metal no terminó el fotograma de \(item.id).")
+            var pixels = [UInt8](repeating: 0, count: target.width * target.height * 4)
+            pixels.withUnsafeMutableBytes {
+                target.getBytes($0.baseAddress!, bytesPerRow: target.width * 4,
+                                from: MTLRegionMake2D(0, 0, target.width, target.height), mipmapLevel: 0)
+            }
+            let hash = sha256Hex(Data(pixels))
+            let elapsed = (CFAbsoluteTimeGetCurrent() - start) * 1000.0
+            lines.append("    { \"id\": \"\(item.id)\", \"sha256\": \"\(hash)\", \"bytes\": \(pixels.count), \"ms\": \(String(format: "%.2f", elapsed)) }")
+            print("Bateria: \(item.id) \(hash) \(String(format: "%.1f", elapsed)) ms")
+        }
+        let json = "{\n  \"cases\": [\n" + lines.joined(separator: ",\n") + "\n  ]\n}\n"
+        try Data(json.utf8).write(to: URL(fileURLWithPath: output))
+        print("Bateria: \(cases.count) casos escritos en \(output)")
+    }
+
+    static func runDump(app: Bundle, folder: String) throws {
+        let renderer = try MatrizRenderer(bundle: app)
+        func dump(_ id: String, width: Int, height: Int, time: Double, pixelRatio: Float,
+                  configure: (inout MatrizSettings) -> Void) throws {
+            var settings = MatrizSettings()
+            configure(&settings)
+            let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba8Unorm,
+                width: width, height: height, mipmapped: false)
+            descriptor.usage = [.renderTarget]
+            descriptor.storageMode = .shared
+            let target = renderer.device.makeTexture(descriptor: descriptor)!
+            let command = try renderer.render(texture: target, time: time, pixelRatio: pixelRatio, settings: settings)
+            command.waitUntilCompleted()
+            if let error = command.error { throw error }
+            precondition(command.status == .completed, "Metal no terminó el volcado de \(id).")
+            var pixels = [UInt8](repeating: 0, count: width * height * 4)
+            pixels.withUnsafeMutableBytes {
+                target.getBytes($0.baseAddress!, bytesPerRow: width * 4,
+                                from: MTLRegionMake2D(0, 0, width, height), mipmapLevel: 0)
+            }
+            try Data(pixels).write(to: URL(fileURLWithPath: folder).appendingPathComponent("\(id).rgba"))
+            print("Volcado: \(id) (\(pixels.count) bytes)")
+        }
+        try dump("estilo-1-t0", width: 1440, height: 900, time: 0, pixelRatio: 1) { $0.backgroundStyle = 1 }
+        try dump("estilo-2-t0", width: 1440, height: 900, time: 0, pixelRatio: 1) { $0.backgroundStyle = 2 }
+        try dump("dpr-1.5", width: 1440, height: 900, time: 2, pixelRatio: 1.5) { $0.deformation = 4 }
+        try dump("pequena-800x600", width: 800, height: 600, time: 0.7, pixelRatio: 1.5) {
+            $0.backgroundStyle = 5
+            $0.deformation = 4
+        }
+    }
+
+    static func runDocs(app: Bundle, folder: String) throws {
+        let renderer = try MatrizRenderer(bundle: app)
+        func shot(_ id: String, width: Int, height: Int, time: Double, pixelRatio: Float,
+                  configure: (inout MatrizSettings) -> Void) throws {
+            var settings = MatrizSettings()
+            configure(&settings)
+            let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba8Unorm,
+                width: width, height: height, mipmapped: false)
+            descriptor.usage = [.renderTarget]
+            descriptor.storageMode = .shared
+            let target = renderer.device.makeTexture(descriptor: descriptor)!
+            let command = try renderer.render(texture: target, time: time, pixelRatio: pixelRatio, settings: settings)
+            command.waitUntilCompleted()
+            if let error = command.error { throw error }
+            precondition(command.status == .completed, "Metal no terminó el render de \(id).")
+            var pixels = [UInt8](repeating: 0, count: width * height * 4)
+            pixels.withUnsafeMutableBytes {
+                target.getBytes($0.baseAddress!, bytesPerRow: width * 4,
+                                from: MTLRegionMake2D(0, 0, width, height), mipmapLevel: 0)
+            }
+            let image = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: width, pixelsHigh: height,
+                bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
+                colorSpaceName: .deviceRGB, bytesPerRow: width * 4, bitsPerPixel: 32)!
+            pixels.withUnsafeBytes { image.bitmapData!.update(from: $0.baseAddress!.assumingMemoryBound(to: UInt8.self), count: pixels.count) }
+            try image.representation(using: .png, properties: [:])!
+                .write(to: URL(fileURLWithPath: folder).appendingPathComponent("\(id).png"))
+            print("Docs: \(id) (\(width)x\(height))")
+        }
+        try shot("banner-base", width: 2560, height: 640, time: 9, pixelRatio: 1) {
+            $0.backgroundStyle = 1
+            $0.palette = 5
+            $0.size = 1.4
+        }
+        try shot("icono-fondo-a", width: 1024, height: 1024, time: 9, pixelRatio: 1) {
+            $0.backgroundStyle = 1
+            $0.palette = 5
+            $0.size = 1.4
+        }
+        try shot("icono-fondo-b", width: 1024, height: 1024, time: 2.6, pixelRatio: 1) {
+            $0.backgroundStyle = 1
+            $0.palette = 5
+            $0.size = 1.4
+            $0.wavePosition = 0.25
+        }
+        try shot("icono-fondo-liso", width: 1024, height: 1024, time: 2.6, pixelRatio: 1) {
+            $0.backgroundStyle = 1
+            $0.palette = 5
+            $0.sparkleOpacity = 0
+            $0.wavePosition = 0.25
+        }
+        for style in 0...5 {
+            try shot("galeria-\(style)", width: 1280, height: 800, time: 9, pixelRatio: 1) {
+                $0.backgroundStyle = style
+                $0.palette = 5
+            }
+        }
     }
 
     static func main() throws {
@@ -159,6 +396,21 @@ enum MatrizCheck {
                 RunLoop.current.run(until: Date().addingTimeInterval(0.05))
             }
             precondition(preferences.settings.brightness == 0.73)
+            return
+        }
+        if CommandLine.arguments[1] == "--battery" {
+            let app = Bundle(path: CommandLine.arguments[2])!
+            try runBattery(app: app, output: CommandLine.arguments[3])
+            return
+        }
+        if CommandLine.arguments[1] == "--dump" {
+            let app = Bundle(path: CommandLine.arguments[2])!
+            try runDump(app: app, folder: CommandLine.arguments[3])
+            return
+        }
+        if CommandLine.arguments[1] == "--docs" {
+            let app = Bundle(path: CommandLine.arguments[2])!
+            try runDocs(app: app, folder: CommandLine.arguments[3])
             return
         }
         MatrizMediaCheck.run()
@@ -234,9 +486,12 @@ enum MatrizCheck {
         noCover.primary.w = 0; noCover.secondary.w = 0; noCover.tertiary.w = 0; noCover.quaternary.w = 0
         let neutralCover = try frame(0, artworkPalette: noCover)
         precondition(neutralCover == first, "Intensidad cero no recupera la paleta.")
+        var fullStyle = MatrizSettings()
+        fullStyle.backgroundStyle = 0
+        let full = try frame(0, settings: fullStyle)
         for (x, y) in [(0, 0), (1439, 0), (0, 899), (1439, 899), (720, 450)] {
             let i = (y * 1440 + x) * 4
-            precondition(first[i + 3] == 255 && first[i + 2] > 0, "Hay un hueco fuera de la superficie.")
+            precondition(full[i + 3] == 255 && full[i + 2] > 0, "Hay un hueco fuera de la superficie.")
         }
         let adjustments: [(String, WritableKeyPath<MatrizSettings, Double>, Double)] = [
             ("brillo", \.brightness, 0.4), ("contraste", \.contrast, 0.5),
@@ -244,6 +499,7 @@ enum MatrizCheck {
             ("volúmenes", \.volumeScale, 1.8), ("concavidad", \.concavity, 0), ("matiz", \.hue, 120),
             ("opacidad de onda", \.waveOpacity, 0), ("opacidad de destellos", \.sparkleOpacity, 0),
             ("tamaño por onda", \.waveSizeInfluence, 3), ("desplazamiento", \.deformation, 1),
+            ("posición de la onda", \.wavePosition, 0.25),
             ("cantidad de colores", \.paletteRichness, 0),
             ("saturación", \.saturation, 0), ("contraste de color", \.colorContrast, 2)
         ]
@@ -255,7 +511,7 @@ enum MatrizCheck {
             precondition(difference > first.count / 10, "El ajuste \(name) no cambia la imagen.")
         }
 
-        for palette in [0, 2, 3, 4, 5, 6, 7, 8] {
+        for palette in [0, 2, 3, 4, 6, 7, 8] {
             var settings = MatrizSettings()
             settings.palette = palette
             let adjusted = try frame(0, settings: settings)
@@ -331,7 +587,7 @@ enum MatrizCheck {
             let pixels = try frame(0, settings: setting)
             styles.append(pixels)
             try save(pixels, to: folder.appendingPathComponent("Matriz-style-\(style).png").path)
-            if style > 0 { precondition(pixels != first, "Un estilo no altera la composición.") }
+            if style > 0 { precondition(pixels != styles[0], "Un estilo no altera la composición.") }
         }
         precondition(luminance(styles[1],720,80) == 0 && luminance(styles[1],720,820) > 3, "La onda inferior está invertida.")
         precondition(luminance(styles[2],720,820) == 0 && luminance(styles[2],720,80) > 3, "La onda superior está invertida.")
@@ -340,6 +596,7 @@ enum MatrizCheck {
         precondition(luminance(styles[4],720,450) > 3 && luminance(styles[4],20,20) == 0, "El orbe no está centrado.")
         precondition(luminance(styles[5],720,450) == 0 && luminance(styles[5],20,20) > 3, "El orbe inverso no deja hueco central.")
         var maskOnly = MatrizSettings()
+        maskOnly.backgroundStyle = 0
         maskOnly.sparkleOpacity = 0
         let fullWave = try frame(0, settings: maskOnly)
         maskOnly.backgroundStyle = 4
@@ -353,10 +610,26 @@ enum MatrizCheck {
             if fullWave[i+2] > 10 && orbWave[i+2] > 2 && Int(orbWave[i+2]) < Int(fullWave[i+2]) - 2 { fading += 1 }
         }
         precondition(fading > 10000, "El borde del estilo es un recorte duro.")
+        for style in 1...3 {
+            var shifted = MatrizSettings()
+            shifted.backgroundStyle = style
+            shifted.wavePosition = 0.25
+            let shiftedFrame = try frame(0, settings: shifted)
+            precondition(shiftedFrame != styles[style], "La posición no desplaza la onda del estilo \(style).")
+        }
+        var movedOrb = MatrizSettings()
+        movedOrb.backgroundStyle = 4
+        movedOrb.orbX = 0.3
+        let movedFrame = try frame(0, settings: movedOrb)
+        precondition(movedFrame != styles[4], "La posición horizontal del orbe no mueve la imagen.")
+        movedOrb.orbX = 0
+        movedOrb.orbY = -0.3
+        let movedFrameY = try frame(0, settings: movedOrb)
+        precondition(movedFrameY != styles[4] && movedFrameY != movedFrame, "La posición vertical del orbe no mueve la imagen.")
         var largeOrb = MatrizSettings()
         largeOrb.backgroundStyle = 4; largeOrb.orbSize = 6
         let largeFilled = try frame(0, settings: largeOrb)
-        precondition(zip(first,largeFilled).allSatisfy { abs(Int($0.0)-Int($0.1)) <= 1 }, "El orbe no puede superar toda la pantalla.")
+        precondition(zip(styles[0],largeFilled).allSatisfy { abs(Int($0.0)-Int($0.1)) <= 1 }, "El orbe no puede superar toda la pantalla.")
         largeOrb.backgroundStyle = 5
         let largeHole = try frame(0, settings: largeOrb)
         precondition(stride(from:0,to:largeHole.count,by:4).allSatisfy { largeHole[$0] == 0 && largeHole[$0+1] == 0 && largeHole[$0+2] == 0 })

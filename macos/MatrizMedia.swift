@@ -20,7 +20,7 @@ final class MatrizMedia {
             service.report = { [weak self] status, value in
                 guard let self, self.audioActive else { return }
                 if self.live.audioStatus != status { self.live.audioStatus = status }
-                self.live.audioBusy = false
+                if self.live.audioBusy { self.live.audioBusy = false }
                 if let value { self.live.setAudio(value, at: ProcessInfo.processInfo.systemUptime) }
             }
             audio = service

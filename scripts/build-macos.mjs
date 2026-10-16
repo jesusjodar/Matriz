@@ -1,9 +1,10 @@
 import { execFileSync } from 'node:child_process'
-import { cpSync, existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
+import { cpSync, existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { writeLocalizations } from './localization.mjs'
+import { generateMetal } from './metal.mjs'
 
 if (process.platform !== 'darwin') throw new Error('La versión nativa requiere macOS y las herramientas de Xcode.')
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
@@ -17,33 +18,24 @@ run('xcrun', ['actool', 'macos/Assets/Matriz.icon', '--compile', icons,
   '--output-partial-info-plist', join(icons, 'partial.plist'), '--target-device', 'mac'])
 const icon = join(icons, 'Matriz.icns')
 const source = readFileSync(join(root, 'src/sparkles.frag'), 'utf8')
-const uniforms = [...source.matchAll(/^uniform (vec[234]|float) (u\w+);$/gm)]
-const metalType = type => type.replace('vec', 'float')
-const field = name => name[1].toLowerCase() + name.slice(2)
-// Las ecuaciones se generan desde el GLSL para mantener una única fuente visual.
-const metal = `#include <metal_stdlib>
-using namespace metal;
-struct Uniforms { ${uniforms.map(([, type, name]) => `${metalType(type)} ${field(name)};`).join(' ')} };
-struct VertexOut { float4 position [[position]]; };
-vertex VertexOut matrizVertex(uint id [[vertex_id]]) {
-    const float2 positions[3] = {float2(-1.0, -1.0), float2(3.0, -1.0), float2(-1.0, 3.0)};
-    return {float4(positions[id], 0.0, 1.0)};
-}
-` + source
-  .replace(/^#version.*\n|^precision.*\n|^uniform.*\n|^out vec4.*\n/gm, '')
-  .replace(/^const float /gm, 'constant float ')
-  .replace(/\bvec([234])\b/g, 'float$1')
-  .replace(/\bdFdx\b/g, 'dfdx').replace(/\bdFdy\b/g, 'dfdy')
-  .replace('void main() {', `fragment float4 matrizFragment(VertexOut in [[stage_in]], constant Uniforms& uniforms [[buffer(0)]]) {
-    ${uniforms.map(([, type, name]) => `${metalType(type)} ${name} = uniforms.${field(name)};`).join('\n    ')}
-    float4 gl_FragCoord = float4(in.position.x, uResolution.y - in.position.y, 0.0, 1.0);`)
-  .replace('outColor = ', 'return ')
+const metal = generateMetal(source)
 
 function bundle(name, extension, identifier, principalClass) {
   const path = join(output, `${name}.${extension}`)
   mkdirSync(join(path, 'Contents/MacOS'), { recursive: true })
   mkdirSync(join(path, 'Contents/Resources'), { recursive: true })
   writeFileSync(join(path, 'Contents/Resources/Matriz.metal'), metal)
+  try {
+    const air = join(output, `${extension}.air`)
+    const metallib = join(path, 'Contents/Resources/Matriz.metallib')
+    rmSync(air, { force: true })
+    rmSync(metallib, { force: true })
+    run('xcrun', ['-sdk', 'macosx', 'metal', '-mmacosx-version-min=14.0', '-c',
+      join(path, 'Contents/Resources/Matriz.metal'), '-o', air])
+    run('xcrun', ['-sdk', 'macosx', 'metallib', air, '-o', metallib])
+  } catch (error) {
+    console.warn(`Aviso: no se pudo precompilar Matriz.metallib (${error.message}); se usará la fuente .metal.`)
+  }
   cpSync(icon, join(path, 'Contents/Resources/Matriz.icns'))
   cpSync(join(icons, 'Assets.car'), join(path, 'Contents/Resources/Assets.car'))
   cpSync(join(root, 'macos/Assets/Author.jpg'), join(path, 'Contents/Resources/Author.jpg'))
@@ -51,7 +43,7 @@ function bundle(name, extension, identifier, principalClass) {
   const plist = {
     CFBundleName: name, CFBundleDisplayName: name, CFBundleIdentifier: identifier,
     CFBundleExecutable: name, CFBundlePackageType: extension === 'app' ? 'APPL' : 'BNDL',
-    CFBundleShortVersionString: '2.0.0', CFBundleVersion: '7', LSMinimumSystemVersion: '14.0',
+    CFBundleShortVersionString: '2.1.0', CFBundleVersion: '8', LSMinimumSystemVersion: '14.0',
     CFBundleIconFile: 'Matriz.icns', CFBundleIconName: 'Matriz', CFBundleDevelopmentRegion: 'en',
     NSHighResolutionCapable: true,
     ...(principalClass ? { NSPrincipalClass: principalClass } : {

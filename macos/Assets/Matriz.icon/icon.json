@@ -149,6 +149,66 @@
     {
       "layers" : [
         {
+          "fill-specializations" : [
+            {
+              "value" : {
+                "linear-gradient" : [
+                  "display-p3:1.00000,0.24109,1.00000,1.00000",
+                  "srgb:0.00000,0.29378,1.00000,1.00000"
+                ],
+                "orientation" : {
+                  "start" : {
+                    "x" : 0.6138527232599091,
+                    "y" : 0.06962099267528814
+                  },
+                  "stop" : {
+                    "x" : 0.5599714150103151,
+                    "y" : 0.4360982860127832
+                  }
+                }
+              }
+            },
+            {
+              "appearance" : "dark",
+              "value" : {
+                "linear-gradient" : [
+                  "display-p3:0.27187,0.00000,1.00000,1.00000",
+                  "srgb:0.80734,0.16754,1.00000,1.00000"
+                ],
+                "orientation" : {
+                  "start" : {
+                    "x" : 0.5789295122913338,
+                    "y" : 0.1979733899169449
+                  },
+                  "stop" : {
+                    "x" : 0.5789665151504804,
+                    "y" : 0.38045298979842046
+                  }
+                }
+              }
+            }
+          ],
+          "hidden" : false,
+          "image-name" : "icono-fondo-liso.png",
+          "name" : "icono-fondo-liso",
+          "opacity-specializations" : [
+            {
+              "value" : 0.59
+            },
+            {
+              "appearance" : "dark",
+              "value" : 0.49
+            }
+          ],
+          "position" : {
+            "scale" : 4,
+            "translation-in-points" : [
+              -324,
+              1010
+            ]
+          }
+        },
+        {
           "blend-mode-specializations" : [
             {
               "appearance" : "tinted",
@@ -157,8 +217,11 @@
           ],
           "fill-specializations" : [
             {
+              "value" : "none"
+            },
+            {
               "appearance" : "dark",
-              "value" : "automatic"
+              "value" : "none"
             },
             {
               "appearance" : "tinted",
@@ -168,6 +231,7 @@
             }
           ],
           "glass" : false,
+          "hidden" : false,
           "image-name" : "Matriz-Background.png",
           "name" : "Matriz-Background",
           "opacity-specializations" : [
@@ -179,20 +243,20 @@
           "position-specializations" : [
             {
               "value" : {
-                "scale" : 2.54,
+                "scale" : 3.8,
                 "translation-in-points" : [
-                  0,
-                  173
+                  -367,
+                  980
                 ]
               }
             },
             {
               "appearance" : "dark",
               "value" : {
-                "scale" : 5,
+                "scale" : 4,
                 "translation-in-points" : [
-                  -10,
-                  -38
+                  -312,
+                  1010
                 ]
               }
             }
@@ -207,6 +271,19 @@
       "translucency" : {
         "enabled" : false,
         "value" : 0
+      }
+    },
+    {
+      "layers" : [
+
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.3
       }
     }
   ],

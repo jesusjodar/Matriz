@@ -3,22 +3,25 @@ import ScreenSaver
 import SwiftUI
 
 struct MatrizSettings: Equatable {
-    var speed = 1.0
+    var speed = 1.50166015625
     var brightness = 1.0
     var contrast = 1.0
-    var palette = 1
+    var palette = 5
     var hue = 0.0
     var spacing = 8.0
     var size = 1.0
-    var volumeScale = 1.0
+    var volumeScale = 0.6
     var quality = 1
     var concavity = 0.78
     var waveOpacity = 1.0
     var sparkleOpacity = 1.0
     var waveSizeInfluence = 1.0
     var depthConcavity = 0.0
-    var deformation = 0.45
-    var backgroundStyle = 0
+    var deformation = 4.0
+    var backgroundStyle = 1
+    var wavePosition = 0.0
+    var orbX = 0.0
+    var orbY = 0.0
     var orbSize = 1.0
     var sparkleShape = 0
     var paletteRichness = 1.0
@@ -28,14 +31,14 @@ struct MatrizSettings: Equatable {
     var customLight = SIMD3<Double>(0.10, 0.24, 0.68)
     var customSoft = SIMD3<Double>(0.24, 0.15, 0.55)
     var customAccent = SIMD3<Double>(0.025, 0.48, 0.63)
-    var audioEnabled = false
-    var audioSensitivity = 6.0
-    var audioIntensity = 0.65
-    var audioResponse = 0.45
-    var artworkEnabled = false
-    var artworkIntensity = 1.0
+    var audioEnabled = true
+    var audioSensitivity = 0.3258231026785712
+    var audioIntensity = 0.6976422991071428
+    var audioResponse = 0.09794224330357143
+    var artworkEnabled = true
+    var artworkIntensity = 2.0
     var artworkTransition = 3.0
-    var artworkColors = 3
+    var artworkColors = 4
 
     init(_ values: [String: Any] = [:]) {
         func number(_ key: String, _ fallback: Double, _ range: ClosedRange<Double>) -> Double {
@@ -43,8 +46,8 @@ struct MatrizSettings: Equatable {
                   CFGetTypeID(value) != CFBooleanGetTypeID(), value.doubleValue.isFinite else { return fallback }
             return min(range.upperBound, max(range.lowerBound, value.doubleValue))
         }
-        func boolean(_ key: String) -> Bool {
-            guard let value = values[key] as? NSNumber, CFGetTypeID(value) == CFBooleanGetTypeID() else { return false }
+        func boolean(_ key: String, _ fallback: Bool = false) -> Bool {
+            guard let value = values[key] as? NSNumber, CFGetTypeID(value) == CFBooleanGetTypeID() else { return fallback }
             return value.boolValue
         }
         func color(_ key: String, _ fallback: SIMD3<Double>) -> SIMD3<Double> {
@@ -58,8 +61,11 @@ struct MatrizSettings: Equatable {
         let currentFormat = (values["settingsVersion"] as? Int ?? 0) >= 2
         depthConcavity = currentFormat ? number("depthConcavity", 0, 0...1)
             : (boolean("depthConcavityEnabled") ? number("depthConcavity", 0.5, 0...1) : 0)
-        deformation = number("deformation", 0.45, 0...4)
-        backgroundStyle = Int(number("backgroundStyle", 0, 0...5).rounded())
+        deformation = number("deformation", 4, 0...4)
+        backgroundStyle = Int(number("backgroundStyle", 1, 0...5).rounded())
+        wavePosition = number("wavePosition", 0, -0.35...0.35)
+        orbX = number("orbX", 0, -0.5...0.5)
+        orbY = number("orbY", 0, -0.5...0.5)
         orbSize = number("orbSize", 1, 0.2...6)
         sparkleShape = Int(number("sparkleShape", 0, 0...2).rounded())
         paletteRichness = number("paletteRichness", 1, 0...1)
@@ -69,22 +75,22 @@ struct MatrizSettings: Equatable {
         customLight = color("customLight", customLight)
         customSoft = color("customSoft", customSoft)
         customAccent = color("customAccent", customAccent)
-        audioEnabled = boolean("audioEnabled")
-        audioSensitivity = number("audioSensitivity", 6, -12...18)
-        audioIntensity = number("audioIntensity", 0.65, 0...1)
-        audioResponse = number("audioResponse", 0.45, 0...1)
-        artworkEnabled = boolean("artworkEnabled")
-        artworkIntensity = currentFormat ? number("artworkIntensity", 1, 0...2) : 1
+        audioEnabled = boolean("audioEnabled", true)
+        audioSensitivity = number("audioSensitivity", 0.3258231026785712, -12...18)
+        audioIntensity = number("audioIntensity", 0.6976422991071428, 0...1)
+        audioResponse = number("audioResponse", 0.09794224330357143, 0...1)
+        artworkEnabled = boolean("artworkEnabled", true)
+        artworkIntensity = currentFormat ? number("artworkIntensity", 2, 0...2) : 1
         artworkTransition = number("artworkTransition", 3, 1...8)
-        artworkColors = Int(number("artworkColors", 3, 1...4).rounded())
-        speed = number("speed", 1, 0.25...2)
+        artworkColors = Int(number("artworkColors", 4, 1...4).rounded())
+        speed = number("speed", 1.50166015625, 0.25...2)
         brightness = number("brightness", 1, 0...2)
         contrast = number("contrast", 1, 0.5...1.5)
-        palette = Int(number("palette", 1, 0...8).rounded())
+        palette = Int(number("palette", 5, 0...8).rounded())
         hue = number("hue", 0, 0...360)
         spacing = number("spacing", 8, 6...16)
         size = number("size", 1, 0.6...1.4)
-        volumeScale = number("volumeScale", 1, 0.6...1.8)
+        volumeScale = number("volumeScale", 0.6, 0.6...1.8)
         quality = Int(number("quality", 1, 0...2).rounded())
         concavity = number("concavity", 0.78, 0...0.85)
     }
@@ -97,7 +103,7 @@ struct MatrizSettings: Equatable {
          "artworkIntensity": artworkIntensity, "artworkTransition": artworkTransition, "artworkColors": artworkColors,
                       "waveOpacity": waveOpacity, "sparkleOpacity": sparkleOpacity, "waveSizeInfluence": waveSizeInfluence,
                       "depthConcavity": depthConcavity,
-                      "deformation": deformation, "backgroundStyle": backgroundStyle, "orbSize": orbSize,
+                      "deformation": deformation, "backgroundStyle": backgroundStyle, "wavePosition": wavePosition, "orbX": orbX, "orbY": orbY, "orbSize": orbSize,
                       "sparkleShape": sparkleShape, "paletteRichness": paletteRichness,
                       "saturation": saturation, "colorContrast": colorContrast,
                       "customDeep": [customDeep.x, customDeep.y, customDeep.z],

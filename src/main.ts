@@ -4,6 +4,7 @@ import fragmentSource from './sparkles.frag?raw'
 
 const canvas = document.querySelector<HTMLCanvasElement>('#canvas')!
 const gl = canvas.getContext('webgl2', {
+  alpha: false,
   antialias: false,
   depth: false,
   stencil: false,
@@ -38,21 +39,22 @@ if (gl) {
   const phases = gl.getUniformLocation(program, 'uPhase')
   const waveX = gl.getUniformLocation(program, 'uWaveX')
   const waveY = gl.getUniformLocation(program, 'uWaveY')
-  let renderPixelRatio = 1
+  let renderPixelRatio = 0
   gl.uniform4f(gl.getUniformLocation(program, 'uAudio'), 0, 0, 0, 0)
   gl.uniform4f(gl.getUniformLocation(program, 'uSurface'), 1, 1, 1, 0)
-  gl.uniform4f(gl.getUniformLocation(program, 'uLayout'), 0, 1, 0, 0)
-  gl.uniform2f(gl.getUniformLocation(program, 'uStyle'), 0.45, 1)
+  gl.uniform4f(gl.getUniformLocation(program, 'uLayout'), 1, 1, 0, 0)
+  gl.uniform4f(gl.getUniformLocation(program, 'uOrb'), 0, 0, 0, 0)
+  gl.uniform2f(gl.getUniformLocation(program, 'uStyle'), 4, 1)
   gl.uniform2f(gl.getUniformLocation(program, 'uGrade'), 1, 1)
   for (const [name, value] of Object.entries({
-    uColor0: [0.10, 0.24, 0.68, 1], uColor1: [0.24, 0.15, 0.55, 1],
-    uColor2: [0.025, 0.48, 0.63, 1], uColor3: [0.14, 0.10, 0.44, 1],
+    uColor0: [0.63, 0.12, 0.45, 1], uColor1: [0.30, 0.13, 0.56, 1],
+    uColor2: [0.94, 0.36, 0.57, 1], uColor3: [0.49, 0.12, 0.52, 1],
   })) gl.uniform4f(gl.getUniformLocation(program, name), value[0], value[1], value[2], value[3])
   const phase = (seconds: number, rate: number) => (seconds * rate) % (Math.PI * 2)
   // Los mismos valores iniciales que MatrizSettings en macOS.
   for (const [name, value] of Object.entries({
     uBrightness: 1, uContrast: 1, uSpacing: 8,
-    uSize: 1, uVolumeScale: 1, uConcavity: 0.78,
+    uSize: 1, uVolumeScale: 0.6, uConcavity: 0.78,
   })) gl.uniform1f(gl.getUniformLocation(program, name), value)
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
   let frame = 0
@@ -102,9 +104,14 @@ if (gl) {
 
   const resize = () => {
     const pixelRatio = Math.min(window.devicePixelRatio, 1.5)
+    const width = Math.max(1, Math.round(canvas.clientWidth * pixelRatio))
+    const height = Math.max(1, Math.round(canvas.clientHeight * pixelRatio))
+    if (width === canvas.width && height === canvas.height && pixelRatio === renderPixelRatio) {
+      return
+    }
     renderPixelRatio = pixelRatio
-    canvas.width = Math.max(1, Math.round(canvas.clientWidth * pixelRatio))
-    canvas.height = Math.max(1, Math.round(canvas.clientHeight * pixelRatio))
+    canvas.width = width
+    canvas.height = height
     gl.viewport(0, 0, canvas.width, canvas.height)
     gl.clearColor(0, 0, 0, 1)
     gl.clear(gl.COLOR_BUFFER_BIT)

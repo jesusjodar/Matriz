@@ -12,6 +12,8 @@ final class MatrizAudioService {
     private var scratch: [Float] = []
     private var channels = 0
     private var outputName = L("Mac audio output")
+    private var listeningStatus = ""
+    private var silentStatus = ""
     private var timer: DispatchSourceTimer?
     private var listeners: [(AudioObjectID, AudioObjectPropertyAddress, AudioObjectPropertyListenerBlock)] = []
     private var wanted = false
@@ -86,6 +88,8 @@ final class MatrizAudioService {
             let uid: CFString = try read(device, kAudioDevicePropertyDeviceUID, initial: "" as CFString)
             let name: CFString = try read(device, kAudioObjectPropertyName, initial: L("Mac audio output") as CFString)
             outputName = name as String
+            listeningStatus = LF("Listening to %@", outputName)
+            silentStatus = LF("No sound from %@. Check audio permission if music is playing.", outputName)
             var streamsAddress = AudioObjectPropertyAddress(mSelector: kAudioDevicePropertyStreams,
                 mScope: kAudioObjectPropertyScopeOutput, mElement: kAudioObjectPropertyElementMain)
             var size: UInt32 = 0
@@ -159,7 +163,7 @@ final class MatrizAudioService {
             analysis.process($0, frames: Int(count), at: ProcessInfo.processInfo.systemUptime,
                              sensitivity: settings.audioSensitivity, response: settings.audioResponse)
         } * Float(settings.audioIntensity)
-        publish(value.w > 0.005 ? LF("Listening to %@", outputName) : LF("No sound from %@. Check audio permission if music is playing.", outputName), value)
+        publish(value.w > 0.005 ? listeningStatus : silentStatus, value)
     }
     private func stop() {
         timer?.cancel(); timer = nil

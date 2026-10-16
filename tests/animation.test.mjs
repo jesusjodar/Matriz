@@ -65,15 +65,15 @@ test('anima sin interacción, respeta movimiento reducido y pausa al ocultarse',
 
   assert.equal(frames.length, 1)
   for (const [name, value] of Object.entries({ uBrightness: 1, uContrast: 1,
-    uSpacing: 8, uSize: 1, uVolumeScale: 1, uConcavity: 0.78 })) assert.equal(uniforms[name], value)
+    uSpacing: 8, uSize: 1, uVolumeScale: 0.6, uConcavity: 0.78 })) assert.equal(uniforms[name], value)
   assert.deepEqual(uniforms.uAudio, [0, 0, 0, 0])
   assert.deepEqual(uniforms.uSurface, [1, 1, 1, 0])
-  assert.deepEqual(uniforms.uLayout, [0, 1, 0, 0])
-  assert.deepEqual(uniforms.uStyle, [0.45, 1])
+  assert.deepEqual(uniforms.uLayout, [1, 1, 0, 0])
+  assert.deepEqual(uniforms.uStyle, [4, 1])
   assert.deepEqual(uniforms.uGrade, [1, 1])
   for (const [name, value] of Object.entries({
-    uColor0: [0.10, 0.24, 0.68, 1], uColor1: [0.24, 0.15, 0.55, 1],
-    uColor2: [0.025, 0.48, 0.63, 1], uColor3: [0.14, 0.10, 0.44, 1],
+    uColor0: [0.63, 0.12, 0.45, 1], uColor1: [0.30, 0.13, 0.56, 1],
+    uColor2: [0.94, 0.36, 0.57, 1], uColor3: [0.49, 0.12, 0.52, 1],
   })) assert.deepEqual(uniforms[name], value, name)
 
   frames.shift()()

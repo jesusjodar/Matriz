@@ -93,9 +93,17 @@ struct MatrizSettingsPanel: View {
                 } label: { label("Composition", "rectangle.3.group") }
                 caption("Every composition keeps soft, moving edges.")
             }
+            if preferences.settings.backgroundStyle >= 1 && preferences.settings.backgroundStyle <= 3 {
+                slider("Wave position", "arrow.up.and.down", \.wavePosition, -0.35...0.35,
+                       detail: "Move the wave boundary up or down in the lower, upper and central compositions.")
+            }
             if preferences.settings.backgroundStyle >= 4 {
                 slider("Orb size", "arrow.up.left.and.arrow.down.right", \.orbSize, 0.2...6,
                        detail: "Enlarge the orb or its central opening, even beyond the screen.")
+                slider("Orb center X", "arrow.left.and.right", \.orbX, -0.5...0.5,
+                       detail: "Move the orb away from the center of the screen.")
+                slider("Orb center Y", "arrow.up.and.down", \.orbY, -0.5...0.5,
+                       detail: "Move the orb away from the center of the screen.")
             }
             VStack(alignment: .leading, spacing: 7) {
                 Picker(selection: binding(\.palette)) {

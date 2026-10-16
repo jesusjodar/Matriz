@@ -22,6 +22,7 @@ struct MatrizUniforms {
     var color2: SIMD4<Float>
     var color3: SIMD4<Float>
     var layout: SIMD4<Float>
+    var orb: SIMD4<Float> = .zero
 
     init(width: Int = 1, height: Int = 1, pixelRatio: Float = 1, time: Double = 0,
          settings: MatrizSettings, audio: SIMD4<Float> = .zero, artworkPalette: MatrizArtworkColors? = nil) {
@@ -35,7 +36,8 @@ struct MatrizUniforms {
                         Float(settings.depthConcavity))
         style = SIMD2(Float(settings.deformation), Float(settings.paletteRichness))
         grade = SIMD2(Float(settings.saturation), Float(settings.colorContrast))
-        layout = SIMD4(Float(settings.backgroundStyle), Float(settings.orbSize), Float(settings.sparkleShape), 0)
+        layout = SIMD4(Float(settings.backgroundStyle), Float(settings.orbSize), Float(settings.sparkleShape), Float(settings.wavePosition))
+        orb = SIMD4(Float(settings.orbX), Float(settings.orbY), 0, 0)
         let palette = MatrizColor.manualPalette(settings)
         color0 = palette.primary; color1 = palette.secondary
         color2 = palette.tertiary; color3 = palette.quaternary
@@ -81,16 +83,22 @@ final class MatrizRenderer: NSObject, MTKViewDelegate {
     let device: MTLDevice
     private let queue: MTLCommandQueue
     private let pipeline: MTLRenderPipelineState
+    private let framePass = MTLRenderPassDescriptor()
     private var template = MatrizUniforms(settings: MatrizPreferences.shared.settings)
 
     init(bundle: Bundle) throws {
         guard let device = MTLCreateSystemDefaultDevice(), let queue = device.makeCommandQueue() else {
             throw NSError(domain: "Matriz", code: 1, userInfo: [NSLocalizedDescriptionKey: L("Metal is not available on this Mac.")])
         }
-        guard let url = bundle.url(forResource: "Matriz", withExtension: "metal") else {
+        let library: MTLLibrary
+        if let url = bundle.url(forResource: "Matriz", withExtension: "metallib"),
+           let loaded = try? device.makeLibrary(URL: url) {
+            library = loaded
+        } else if let url = bundle.url(forResource: "Matriz", withExtension: "metal") {
+            library = try device.makeLibrary(source: String(contentsOf: url, encoding: .utf8), options: nil)
+        } else {
             throw NSError(domain: "Matriz", code: 2, userInfo: [NSLocalizedDescriptionKey: "No se encuentra el shader Matriz.metal."])
         }
-        let library = try device.makeLibrary(source: String(contentsOf: url, encoding: .utf8), options: nil)
         let descriptor = MTLRenderPipelineDescriptor()
         descriptor.vertexFunction = library.makeFunction(name: "matrizVertex")
         descriptor.fragmentFunction = library.makeFunction(name: "matrizFragment")
@@ -107,11 +115,10 @@ final class MatrizRenderer: NSObject, MTKViewDelegate {
         guard texture.pixelFormat == .rgba8Unorm, let command = queue.makeCommandBuffer() else {
             throw NSError(domain: "Matriz", code: 3, userInfo: [NSLocalizedDescriptionKey: "No se pudo crear el fotograma SDR."])
         }
-        let pass = MTLRenderPassDescriptor()
-        pass.colorAttachments[0].texture = texture
-        pass.colorAttachments[0].loadAction = .dontCare
-        pass.colorAttachments[0].storeAction = .store
-        guard let encoder = command.makeRenderCommandEncoder(descriptor: pass) else {
+        framePass.colorAttachments[0].texture = texture
+        framePass.colorAttachments[0].loadAction = .dontCare
+        framePass.colorAttachments[0].storeAction = .store
+        guard let encoder = command.makeRenderCommandEncoder(descriptor: framePass) else {
             throw NSError(domain: "Matriz", code: 4, userInfo: [NSLocalizedDescriptionKey: "No se pudo dibujar el fotograma Metal."])
         }
         var uniforms = uniforms
@@ -244,6 +251,6 @@ final class MatrizView: MTKView {
         isPaused = externallyDriven || !renderingActive || reduced
         onTimingChange?(1.0 / Double(renderingActive ? policy.fps : 1))
         updateDrawableSize()
-        if renderingActive { draw() }
+        if renderingActive && isPaused { draw() }
     }
 }
