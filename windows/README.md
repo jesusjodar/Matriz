@@ -1,35 +1,35 @@
-# Matriz para Windows
+# Matriz for Windows
 
-Aplicación de escritorio con ajustes nativos WinUI 3 y fondo WebGL2 alojado en WebView2. Comparte shader, valores visuales y paletas con macOS y el componente web; las integraciones de música y agentes pertenecen solo a las aplicaciones de escritorio.
+Desktop app with native WinUI 3 settings and a WebGL2 background hosted in WebView2. It shares the shader, visual settings and palettes with macOS and the web component; music and agent integrations belong only to the desktop apps.
 
-## Instalar
+## Installation
 
-1. Descarga el ZIP **x64** para Intel/AMD o **ARM64** para Windows en ARM y comprueba su SHA-256 con `Get-FileHash .\Matriz-Windows-x64.zip -Algorithm SHA256`.
-2. Extrae **toda** la carpeta en una ubicación estable, por ejemplo `%LOCALAPPDATA%\Programs\Matriz`. No ejecutes el programa dentro del ZIP ni copies únicamente el `.exe`.
-3. Abre `Matriz.exe`. Requiere Windows 10 1809 o posterior, Explorer y [Microsoft Edge WebView2 Runtime](https://developer.microsoft.com/en-us/microsoft-edge/webview2/). .NET y Windows App SDK van incluidos.
+1. Download the **x64** ZIP for Intel/AMD or **ARM64** for Windows on ARM and check its SHA-256 with `Get-FileHash .\Matriz-Windows-x64.zip -Algorithm SHA256`.
+2. Extract the **entire** folder to a stable location, such as `%LOCALAPPDATA%\Programs\Matriz`. Do not run the app inside the ZIP or copy only the `.exe`.
+3. Open `Matriz.exe`. Requires Windows 10 1809 or later, Explorer and [Microsoft Edge WebView2 Runtime](https://developer.microsoft.com/en-us/microsoft-edge/webview2/). .NET and Windows App SDK are included.
 
-Es una aplicación portable sin firma comercial. Windows puede mostrar SmartScreen; revisa el origen del archivo antes de permitir su ejecución. No requiere permisos de administrador. Cierra la app antes de sustituir sus archivos al actualizar; no borres `%LOCALAPPDATA%\Matriz` si quieres conservar ajustes.
+This is a portable app without a commercial signature. Windows may show SmartScreen; review the file's source before allowing it to run. No administrator privileges are required. Close the app before replacing its files during updates; keep `%LOCALAPPDATA%\Matriz` to preserve settings.
 
-## Ajustes e integraciones
+## Settings and integrations
 
-El panel utiliza navegación superior, controles WinUI 3, tarjetas, selectores de color y una línea de matiz. Las preferencias se guardan de forma atómica en `%LOCALAPPDATA%\Matriz\settings.json`, separadas de las del Mac.
+The panel uses top navigation, WinUI 3 controls, cards, color pickers and a hue strip. Preferences are saved atomically in `%LOCALAPPDATA%\Matriz\settings.json`, separately from Mac preferences.
 
-- **Música:** activa la captura WASAPI loopback desde Música. Analiza la salida predeterminada, sin micrófono, grabación ni transmisión. Para las portadas, autoriza el acceso a las sesiones multimedia: el reproductor debe publicar su carátula mediante los controles multimedia de Windows. Se procesan en memoria y no se guardan.
-- **Agentes:** activa la opción y pulsa **Open setup files**. Se exportan los mismos conectores de [la guía de agentes](../integrations/README.md), con la ruta de tu ejecutable y un adaptador PowerShell local para hooks. Añádelos a tu configuración existente sin reemplazar otros hooks. No se instalan automáticamente ni se modifican los agentes.
-- **Estado genérico:** cualquier agente puede ejecutar `Matriz.exe --agent-event generic running mi-sesion`. Los estados válidos son `idle`, `running`, `input`, `permission`, `error` y `completed`. No se guardan mensajes, nombres de archivos ni contenido del trabajo. Las sesiones se identifican mediante SHA-256 y los eventos caducan.
-- **Pausa:** la animación se suspende al bloquear, usar una sesión remota o detectar una aplicación a pantalla completa. Respeta Reducir movimiento del sistema y reduce calidad en ahorro de batería.
+- **Music:** enable WASAPI loopback capture under Music. It analyzes the default output without a microphone, recording or transmission. For artwork, authorize access to media sessions: the player must publish its artwork through Windows media controls. Images are processed in memory and never saved.
+- **Agents:** enable the option and press **Open setup files**. This exports the same connectors as the [agent guide](../integrations/README.md), with your executable's path and a local PowerShell hook adapter. Add them to your existing configuration without replacing other hooks. They are not installed automatically and do not modify agents.
+- **Generic state:** any agent can run `Matriz.exe --agent-event generic running my-session`. Valid states are `idle`, `running`, `input`, `permission`, `error` and `completed`. Messages, filenames and task content are not saved. Sessions are identified through SHA-256 and events expire.
+- **Pause:** animation is suspended when locking, using a remote session or detecting a full-screen app. It respects the system's Reduce Motion setting and lowers quality in battery saver mode.
 
-Cerrar el panel cierra Matriz y retira el fondo. No inicia automáticamente con Windows. Un error al insertar el fondo o cargar WebView2 se muestra en el panel; el botón de General permite reintentarlo.
+Closing the panel quits Matriz and removes the background. It does not start automatically with Windows. Errors inserting the background or loading WebView2 appear in the panel; the General tab provides a retry button.
 
-## Compatibilidad y límites
+## Compatibility and limitations
 
-El fondo se inserta detrás de los iconos mediante el contenedor WorkerW de Explorer. **WorkerW es un comportamiento no documentado de Explorer**: una actualización de Windows o un escritorio alternativo puede impedirlo. No cambia el fondo guardado por Windows. Esta versión abarca el escritorio virtual completo; todas las pantallas comparten la misma composición.
+The background is inserted behind icons through Explorer's WorkerW container. **WorkerW is undocumented Explorer behavior**: a Windows update or alternative desktop may prevent it from working. It does not change the wallpaper saved by Windows. This version spans the entire virtual desktop; all displays share one composition.
 
-No incluye salvapantallas `.scr` ni fondo animado para la pantalla de bloqueo de Windows. La extensión Wallpaper de macOS es específica de Apple y no se presenta como equivalente en Windows. Audio y portadas requieren comprobarse con tus dispositivos y reproductores; el ejecutable incorpora `--self-test` para validar ajustes, persistencia, conectores y recursos sin modificar tu configuración.
+No `.scr` screensaver or animated Windows lock screen is included. The macOS Wallpaper extension is Apple-specific and is not presented as an equivalent Windows feature. Audio and artwork need verification with your devices and players; the executable includes `--self-test` to validate settings, persistence, connectors and assets without changing your configuration.
 
-## Compilar
+## Build
 
-En Windows, con Node 22 y Visual Studio con MSBuild, Windows SDK y herramientas WinUI:
+On Windows, with Node 22 and Visual Studio with MSBuild, Windows SDK and WinUI tools:
 
 ```powershell
 npm ci
@@ -37,4 +37,4 @@ npm run windows:prepare
 msbuild windows/Matriz/Matriz.csproj /restore /t:Publish /p:Configuration=Release /p:Platform=x64 /p:RuntimeIdentifier=win-x64 /p:PublishDir="$PWD/publish/win-x64/"
 ```
 
-Para ARM64 cambia `x64` por `ARM64` y `win-x64` por `win-arm64`. La integración continua compila ambas arquitecturas. [Flujo multiplataforma](https://github.com/jesusjodar/Matriz/actions/workflows/multiplatform.yml).
+For ARM64, replace `x64` with `ARM64` and `win-x64` with `win-arm64`. CI builds both architectures. See the [multiplatform workflow](https://github.com/jesusjodar/Matriz/actions/workflows/multiplatform.yml).

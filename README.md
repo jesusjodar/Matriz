@@ -1,143 +1,143 @@
 <div align="center">
-  <img src="docs/images/banner.png" alt="Matriz — fondo procedural para macOS con ondas, destellos y música" width="100%">
+  <img src="docs/images/banner.png" alt="Matriz — procedural backgrounds for macOS, Windows and the web" width="100%">
 </div>
 
 <h1 align="center">Matriz</h1>
 
 <p align="center">
-  <strong>Un fondo procedural para macOS, Windows y web:</strong> ondas de luz, destellos geométricos y color orgánico.
+  <strong>A procedural background for macOS, Windows and the web:</strong> waves of light, geometric sparkles and organic color.
 </p>
 
 <p align="center">
   <img alt="macOS 14+" src="https://img.shields.io/badge/macOS-14%2B-1d1d1f?logo=apple&logoColor=white">
   <img alt="Apple Silicon" src="https://img.shields.io/badge/Apple_Silicon-arm64-4a90d9?logo=apple&logoColor=white">
-  <img alt="Versión 2.3.0" src="https://img.shields.io/badge/versi%C3%B3n-2.3.0-7a5cf0">
-  <img alt="Idiomas 20" src="https://img.shields.io/badge/idiomas-20-2ea44f">
+  <img alt="Version 2.3.0" src="https://img.shields.io/badge/version-2.3.0-7a5cf0">
+  <img alt="20 languages" src="https://img.shields.io/badge/languages-20-2ea44f">
 </p>
 
 <p align="center">
-  <a href="https://github.com/jesusjodar/Matriz/releases"><strong>⬇️ Descargar la última versión</strong></a>
+  <a href="https://github.com/jesusjodar/Matriz/releases"><strong>⬇️ Download the latest release</strong></a>
 </p>
 
 ---
 
-Matriz dibuja detrás de los iconos del escritorio, en todas las pantallas. Un campo orgánico de luz, color y destellos se mueve despacio: la profundidad anima el tamaño de cada partícula y el flujo traslada sus centros sin deformar las figuras. No usa el ratón, ni sensores, ni clics. Si lo deseas, Matriz escucha la salida de audio del Mac y sustituye su paleta por los colores de la portada que esté sonando.
+Matriz draws behind your desktop icons on every display. An organic field of light, color and sparkles moves slowly: depth animates each particle's size while the flow moves its center without deforming its shape. It does not use the mouse, sensors or clicks. If enabled, Matriz analyzes your Mac's audio output and replaces its palette with colors from the currently playing album artwork.
 
-## Windows y componente web
+## Windows and web component
 
-Matriz también dispone de una [aplicación Windows con ajustes nativos WinUI 3](windows/README.md) para x64 y ARM64 y un [componente web listo para integrar](packages/web/README.md). Descarga los [paquetes de la versión 2.3.0](https://github.com/jesusjodar/Matriz/releases/tag/v2.3.0): [Windows x64](https://github.com/jesusjodar/Matriz/releases/download/v2.3.0/Matriz-Windows-x64.zip), [Windows ARM64](https://github.com/jesusjodar/Matriz/releases/download/v2.3.0/Matriz-Windows-ARM64.zip), [web sin herramientas de compilación](https://github.com/jesusjodar/Matriz/releases/download/v2.3.0/Matriz-Web-2.3.0.zip) o [paquete npm local](https://github.com/jesusjodar/Matriz/releases/download/v2.3.0/matriz-background-2.3.0.tgz). Los cambios siguientes también se comprueban en el [flujo multiplataforma](https://github.com/jesusjodar/Matriz/actions/workflows/multiplatform.yml).
+Matriz also provides a [Windows app with native WinUI 3 settings](windows/README.md) for x64 and ARM64 and a [ready-to-integrate web component](packages/web/README.md). Download the [2.3.0 packages](https://github.com/jesusjodar/Matriz/releases/tag/v2.3.0): [Windows x64](https://github.com/jesusjodar/Matriz/releases/download/v2.3.0/Matriz-Windows-x64.zip), [Windows ARM64](https://github.com/jesusjodar/Matriz/releases/download/v2.3.0/Matriz-Windows-ARM64.zip), [web without build tools](https://github.com/jesusjodar/Matriz/releases/download/v2.3.0/Matriz-Web-2.3.0.zip) or the [local npm package](https://github.com/jesusjodar/Matriz/releases/download/v2.3.0/matriz-background-2.3.0.tgz). Further changes are also checked by the [multiplatform workflow](https://github.com/jesusjodar/Matriz/actions/workflows/multiplatform.yml).
 
-La web es exclusivamente visual: **sin música, IA ni ajustes visibles**. Configura los valores directamente en JavaScript o en el atributo `settings`. Incluye un [ejemplo completo](packages/web/example.html), tipos TypeScript, módulos ESM y un script clásico.
+The web component is visual only: **no music, AI or visible settings**. Configure values directly in JavaScript or through the `settings` attribute. It includes a [complete example](packages/web/example.html), TypeScript types, ESM modules and a classic script.
 
-| Función | macOS | Windows | Web |
+| Feature | macOS | Windows | Web |
 |---|---|---|---|
-| Shader, paletas y ajustes visuales | Metal | WebGL2 | WebGL2 |
-| Panel nativo | SwiftUI / Liquid Glass | WinUI 3 | Configuración por código |
-| Audio del sistema | Core Audio Taps | WASAPI loopback | — |
-| Paleta de portada | Música / Spotify | Sesiones multimedia de Windows | — |
-| Estados de agentes | Hooks locales | Hooks locales | — |
-| Escritorio | Todas las pantallas | Escritorio virtual de Explorer | Fondo de un contenedor HTML |
-| Salvapantallas | `.saver` y extensión | — | — |
-| Extensión Wallpaper / bloqueo | macOS 26+, API privada | — | — |
+| Shader, palettes and visual settings | Metal | WebGL2 | WebGL2 |
+| Native panel | SwiftUI / Liquid Glass | WinUI 3 | Configuration through code |
+| System audio | Core Audio Taps | WASAPI loopback | — |
+| Album artwork palette | Music / Spotify | Windows media sessions | — |
+| Agent states | Local hooks | Local hooks | — |
+| Desktop | All displays | Explorer virtual desktop | HTML container background |
+| Screensaver | `.saver` and extension | — | — |
+| Wallpaper / lock screen extension | macOS 26+, private API | — | — |
 
-Los cambios futuros mantienen los tres clientes mediante un shader común, un contrato de valores en `shared/` y compilaciones de las tres plataformas. Las integraciones propias de cada sistema se mantienen fuera de la API web. La compilación automatizada de Windows no sustituye una prueba física de Explorer, sonido y reproductores.
+Future changes maintain all three clients through a shared shader, a settings contract in `shared/` and builds for all three platforms. Platform-specific integrations stay outside the web API. Automated Windows builds do not replace physical checks of Explorer, audio and media players.
 
-El resto de esta guía describe la aplicación de **macOS**; consulta las guías enlazadas para instalar Windows o integrar la web.
+The rest of this guide describes the **macOS** app; see the linked guides for Windows installation and web integration.
 
-## Índice
+## Contents
 
-- [Qué es Matriz](#qué-es-matriz)
-- [Galería de estilos](#galería-de-estilos)
-- [El panel de ajustes](#el-panel-de-ajustes)
-- [Instalación](#instalación)
-- [Primeros pasos](#primeros-pasos)
-- [Música y portadas](#música-y-portadas)
-- [Salvapantallas y pantalla de bloqueo](#salvapantallas-y-pantalla-de-bloqueo)
-- [Rendimiento](#rendimiento)
-- [Privacidad](#privacidad)
-- [Preguntas frecuentes](#preguntas-frecuentes)
-- [Desinstalación](#desinstalación)
-- [Desarrollo](#desarrollo)
-- [Autor](#autor)
+- [What is Matriz?](#what-is-matriz)
+- [Style gallery](#style-gallery)
+- [Settings panel](#settings-panel)
+- [Installation](#installation)
+- [Getting started](#getting-started)
+- [Music and album artwork](#music-and-album-artwork)
+- [Screensaver and lock screen](#screensaver-and-lock-screen)
+- [Performance](#performance)
+- [Privacy](#privacy)
+- [Frequently asked questions](#frequently-asked-questions)
+- [Uninstalling](#uninstalling)
+- [Development](#development)
+- [Author](#author)
 
-## Qué es Matriz
+## What is Matriz?
 
-- **Fondo de escritorio animado.** Se coloca detrás de los iconos y del Finder, en todas tus pantallas, sin interferir con tu trabajo.
-- **Seis composiciones.** Desde la pantalla completa hasta orbes con bordes difuminados que pueden ocupar todo el monitor.
-- **Nueve paletas y color a medida.** Cuatro pigmentos ligados al relieve, con ruido orgánico y suavizado regulable; también puedes elegir tus propios colores.
-- **Destellos con carácter.** Estrellas, círculos o cuadrados; tamaño según la profundidad, concavidad ajustable y desplazamiento de hasta el 400 %.
-- **Música en color.** Con tu permiso, Matriz analiza el audio del sistema y toma la paleta de la portada de Música o Spotify, con transiciones interrumpibles.
-- **Salvapantallas incluido.** El mismo estilo visual cuando el Mac está inactivo, con los ajustes compartidos.
-- **20 idiomas completos**, incluidos árabe y hebreo con disposición de derecha a izquierda.
-- **Sin cuentas, sin telemetría y sin servicios en segundo plano.** Todo ocurre en tu Mac.
+- **Animated desktop background.** Sits behind icons and Finder on every display without interfering with your work.
+- **Six compositions.** From full screen to soft-edged orbs that can fill the entire monitor.
+- **Nine palettes and custom color.** Four pigments follow the relief, with organic noise and adjustable smoothing; you can also choose your own colors.
+- **Sparkles with character.** Stars, circles or squares; depth-based sizing, adjustable concavity and displacement up to 400%.
+- **Music in color.** With your permission, Matriz analyzes system audio and uses Music or Spotify album colors, with interruptible transitions.
+- **Screensaver included.** The same visual style when your Mac is idle, with shared settings.
+- **20 complete languages**, including Arabic and Hebrew with right-to-left layouts.
+- **No accounts, telemetry or background services.** Everything happens on your Mac.
 
-## Galería de estilos
+## Style gallery
 
-En **Apariencia → Composición** puedes elegir entre seis estilos. Sus bordes siguen el mismo campo de movimiento: se difuminan y reducen suavemente los destellos cercanos, sin cortes rectos.
+Choose from six styles in **Appearance → Composition**. Their edges follow the same motion field, gently fading and shrinking nearby sparkles without straight cuts.
 
 | | |
 |:---:|:---:|
-| ![Pantalla completa](docs/images/estilo-1-pantalla-completa.png) <br> **Pantalla completa** — ondas y destellos llenan todo el fondo. | ![Onda inferior](docs/images/estilo-2-onda-inferior.png) <br> **Onda inferior** — el estilo inicial: centro más bajo y laterales elevados, con borde orgánico. |
-| ![Onda superior](docs/images/estilo-3-onda-superior.png) <br> **Onda superior** — la composición inversa de la onda inferior. | ![Onda central](docs/images/estilo-4-onda-central.png) <br> **Onda central** — una franja horizontal de bordes cambiantes. |
-| ![Orbe](docs/images/estilo-5-orbe.png) <br> **Orbe** — una forma redondeada con contorno difuminado, escalable del 20 % al 600 % y con centro desplazable. | ![Orbe inverso](docs/images/estilo-6-orbe-inverso.png) <br> **Orbe inverso** — un hueco central con las mismas características y controles de posición y tamaño. |
+| ![Full screen](docs/images/estilo-1-pantalla-completa.png) <br> **Full screen** — waves and sparkles fill the background. | ![Lower wave](docs/images/estilo-2-onda-inferior.png) <br> **Lower wave** — the default style: a lower center and raised sides with an organic edge. |
+| ![Upper wave](docs/images/estilo-3-onda-superior.png) <br> **Upper wave** — the inverse of the lower wave. | ![Center wave](docs/images/estilo-4-onda-central.png) <br> **Center wave** — a horizontal band with changing edges. |
+| ![Orb](docs/images/estilo-5-orbe.png) <br> **Orb** — a rounded shape with a soft outline, scalable from 20% to 600%, with an adjustable center. | ![Inverse orb](docs/images/estilo-6-orbe-inverso.png) <br> **Inverse orb** — a central opening with the same features and position and size controls. |
 
-La **posición de la onda** se ajusta en los estilos inferior, superior y central (hacia arriba o hacia abajo); en los orbes se ajusta el **centro** en ambos ejes.
+Adjust the **wave position** in the lower, upper and center styles (up or down); for orbs, adjust the **center** on both axes.
 
-En **Destellos → Forma de las partículas** eliges estrellas, círculos o cuadrados. Los controles de concavidad solo aparecen con las estrellas y sus valores se conservan al cambiar de figura.
+Under **Sparkles → Particle shape**, choose stars, circles or squares. Concavity controls appear only for stars, and their values are retained when changing shapes.
 
-## El panel de ajustes
+## Settings panel
 
-Al abrir Matriz desde Finder aparece su panel, con fondo negro, navegación nativa Liquid Glass y seis pestañas. Cada cambio se aplica al momento, también al salvapantallas, que comparte los mismos ajustes.
+Opening Matriz from Finder shows its panel with a black background, native Liquid Glass navigation and six tabs. Changes apply immediately, including to the screensaver, which shares the same settings. The screenshots below show the Spanish localization.
 
-| Apariencia y color | Música y portadas |
+| Appearance and color | Music and album artwork |
 |:---:|:---:|
-| <img src="docs/images/panel-apariencia.png" width="340" alt="Panel de ajustes: Apariencia"> | <img src="docs/images/panel-musica.png" width="340" alt="Panel de ajustes: Música y portadas"> |
+| <img src="docs/images/panel-apariencia.png" width="340" alt="Settings panel: Appearance"> | <img src="docs/images/panel-musica.png" width="340" alt="Settings panel: Music and album artwork"> |
 
-- **Apariencia** — composición, posición de ondas y orbes, paleta, variedad, suavizado del ruido de color, matiz, brillo, saturación y contraste.
-- **Partículas** — forma, densidad, tamaño, opacidades, profundidad, luz en sombras y cambios graduales de tamaño y concavidad: los destellos pequeños tienen curvas más profundas y los grandes, menos.
-- **Movimiento** — ritmo, tamaño de los volúmenes y desplazamiento, más contenido en sombras y con arrastre suave en las crestas.
-- **Música** — reacción al audio, sensibilidad, intensidad, suavidad y colores de portada. La saturación de portada parte del 100 % en ajustes nuevos.
-- **Agentes de IA** — paleta por estado y conectores para Codex, Claude Code, OpenCode, Hermes, LM Studio y otros agentes.
-- **General** — rendimiento, salvapantallas, bloqueo y acerca de.
+- **Appearance** — composition, wave and orb position, palette, variety, color noise smoothing, hue, brightness, saturation and contrast.
+- **Particles** — shape, density, size, opacity, depth, shadow light and gradual size and concavity changes: small sparkles have deeper curves than large ones.
+- **Motion** — pace, volume size and displacement, more restrained in shadows with gentle drift along the crests.
+- **Music** — audio response, sensitivity, intensity, smoothing and artwork colors. Artwork saturation starts at 100% for new settings.
+- **AI agents** — state-based palettes and connectors for Codex, Claude Code, OpenCode, Hermes, LM Studio and other agents.
+- **General** — performance, screensaver, locking and about.
 
-Las altas luces se comprimen con una curva suave antes de llegar al límite SDR. El color conserva sus proporciones y el tramado estable reduce las bandas de cuantización.
+Highlights are compressed through a smooth curve before reaching the SDR limit. Color keeps its proportions, and stable dithering reduces quantization banding.
 
-Matriz también respeta **Reducir movimiento** de macOS, que deja una imagen fija, y el **modo de bajo consumo**, que fuerza el perfil de Ahorro. El botón **Restablecer…** solo afecta a Matriz.
+Matriz also respects macOS **Reduce Motion**, which leaves a still image, and **Low Power Mode**, which forces the Energy Saving profile. **Reset…** affects only Matriz.
 
-## Instalación
+## Installation
 
-### Requisitos
+### Requirements
 
-- macOS 14 Sonoma o posterior. La reacción al audio requiere macOS 14.2 o posterior; la extensión de Wallpaper, macOS 26 o posterior.
-- Mac con Apple Silicon. La release está compilada para arm64; en Macs Intel puedes [compilar desde el código fuente](#desarrollo).
-- No se necesita ninguna cuenta ni conexión permanente a internet.
+- macOS 14 Sonoma or later. Audio response requires macOS 14.2 or later; the Wallpaper extension requires macOS 26 or later.
+- An Apple Silicon Mac. The release is built for arm64; on Intel Macs, [build from source](#development).
+- No account or permanent internet connection required.
 
-### Descarga y verificación
+### Download and verify
 
-Descarga el archivo desde la [página de releases](https://github.com/jesusjodar/Matriz/releases) y comprueba su integridad:
+Download the archive from the [releases page](https://github.com/jesusjodar/Matriz/releases) and check its integrity:
 
 ```sh
 curl --fail --location -o Matriz-macOS-arm64-2.3.0.zip https://github.com/jesusjodar/Matriz/releases/download/v2.3.0/Matriz-macOS-arm64-2.3.0.zip
 
 curl --fail --location -o SHA256SUMS https://github.com/jesusjodar/Matriz/releases/download/v2.3.0/SHA256SUMS
 shasum -a 256 -c SHA256SUMS --ignore-missing
-# Debe mostrar: Matriz-macOS-arm64-2.3.0.zip: OK
+# Expected: Matriz-macOS-arm64-2.3.0.zip: OK
 # SHA-256:
 # e3eed67d35919266bf96874aefe633913e072b33ca4a32c99bba7cbd4067aa8a
 ```
 
-### Quitar la cuarentena de macOS
+### Remove macOS quarantine
 
-Matriz está firmada localmente y no está notarizada por Apple, así que macOS marca la descarga como en cuarentena. Retírala con un comando antes de abrirla (si no, verás «no se puede abrir» o «está dañada»):
+Matriz is locally signed and not notarized by Apple, so macOS marks the download as quarantined. Remove quarantine before opening it (otherwise you may see “cannot be opened” or “is damaged”):
 
 ```sh
 unzip -q Matriz-macOS-arm64-2.3.0.zip
 xattr -dr com.apple.quarantine Matriz.app Matriz.saver
 ```
 
-### Instalar y abrir
+### Install and open
 
-La app va a `~/Applications` y el salvapantallas a `~/Library/Screen Savers`:
+The app goes in `~/Applications` and the screensaver in `~/Library/Screen Savers`:
 
 ```sh
 mkdir -p ~/Applications "$HOME/Library/Screen Savers"
@@ -146,129 +146,129 @@ cp -R Matriz.saver "$HOME/Library/Screen Savers/"
 open ~/Applications/Matriz.app
 ```
 
-### Actualizar desde una versión anterior
+### Update from an earlier version
 
-Consulta los [comandos completos de la versión 2.3.0](docs/releases/v2.3.0.md#instalar-o-actualizar-y-retirar-la-cuarentena): guardan los bundles anteriores como copia de seguridad antes de sustituirlos. Las preferencias existentes se conservan.
+See the [complete 2.3.0 commands](docs/releases/v2.3.0.md#install-or-update-and-remove-quarantine-on-macos): they back up the previous bundles before replacing them. Existing preferences are preserved.
 
-## Primeros pasos
+## Getting started
 
-1. Abre Matriz: aparece un icono de destellos en la barra de menús y el fondo comienza a animarse detrás de los iconos del escritorio.
-2. Ve a **Ajustes…** en el menú de la barra de menús (o vuelve a abrir Matriz desde Finder) para elegir composición, paleta y movimiento.
-3. En macOS 26 o posterior, elige **Matriz** en **Ajustes del Sistema → Fondo de pantalla** para usar la extensión. Desde **Salvapantallas…** puedes elegirla también para el reposo; el módulo independiente sigue disponible entre los salvapantallas personalizados.
+1. Open Matriz: a sparkle icon appears in the menu bar and the background starts animating behind desktop icons.
+2. Choose **Settings…** from the menu bar (or reopen Matriz from Finder) to select the composition, palette and motion.
+3. On macOS 26 or later, select **Matriz** in **System Settings → Wallpaper** to use the extension. Choose it under **Screen Saver…** for idle use too; the standalone module remains available among custom screensavers.
 
-Desde el menú de la barra de menús puedes **pausar la animación**, abrir los **ajustes**, abrir los **ajustes de salvapantallas**, consultar cómo funciona el **bloqueo** o **salir y retirar el fondo**. Al salir, se retira la capa de escritorio. Si has elegido la extensión en Fondo de pantalla, macOS conserva esa selección.
+The menu bar lets you **pause animation**, open **settings**, open **screensaver settings**, read about **locking**, or **quit and remove the background**. Quitting removes the desktop layer. If you selected the extension under Wallpaper, macOS retains that selection.
 
-## Música y portadas
+## Music and album artwork
 
-Matriz puede reaccionar al sonido que sale del Mac y tomar prestados los colores de la portada del disco que esté sonando:
+Matriz can react to your Mac's audio output and borrow colors from the current album artwork:
 
-1. Activa **Reacción al audio del Mac** en Música y pulsa **Activar o reintentar el audio**.
-2. Activa **Usar los colores de la portada** dentro de Música → Portadas de álbumes.
-3. Con Música o Spotify de escritorio ya abiertos, pulsa **Autorizar reproductores abiertos**.
+1. Enable **React to Mac audio** under Music and press **Enable or retry audio**.
+2. Enable **Use album artwork colors** under Music → Album artwork.
+3. With the Music or Spotify desktop app open, press **Authorize open players**.
 
-Así funciona:
+How it works:
 
-- **Nada de micrófono.** Core Audio Taps analiza la salida predeterminada del sistema: graves, medios, agudos y energía. El audio no se graba, no se guarda y no se envía a ningún sitio.
-- **Los reproductores no se abren solos.** Cada dos segundos se comprueban los reproductores que ya estén abiertos y autorizados; si ambos suenan, se mantiene el seleccionado para evitar cambios continuos.
-- **Portadas locales.** De Música se lee la portada mediante Apple Events públicos; de Spotify solo se descarga la imagen por HTTPS. Los colores se extraen en tu Mac (hasta cuatro tonos representativos, incluidos blancos, negros, grises y pasteles, en OKLab) y nunca se guardan.
-- **Reacción por frecuencias.** Los graves expanden la altura de las ondas, el ancho de la franja central y el tamaño de los orbes. Los agudos modifican el contorno de los orbes y los detalles de las partículas; cada banda tiene su propia referencia de nivel.
-- **Transiciones suaves.** Al cambiar de canción o de reproductor, la paleta se funde desde el color visible, sin saltos. Si no hay portada o se detiene la reproducción, vuelve a tu paleta elegida.
-- **Se apaga cuando no hace falta.** La captura y las consultas se liberan al desactivar, pausar, dormir, bloquear o salir. Reducir movimiento suspende ambas funciones.
+- **No microphone.** Core Audio Taps analyzes the default system output: bass, mids, treble and energy. Audio is never recorded, saved or sent anywhere.
+- **Players do not open automatically.** Every two seconds, already open and authorized players are checked; if both are playing, the selected one is retained to avoid constant switching.
+- **Local artwork processing.** Music artwork is read through public Apple Events; only Spotify's artwork image is downloaded over HTTPS. Colors are extracted on your Mac (up to four representative tones, including white, black, gray and pastels, in OKLab) and never saved.
+- **Frequency response.** Bass expands wave height, center-band width and orb size. Treble changes orb contours and particle details; each band has its own level reference.
+- **Smooth transitions.** On song or player changes, the palette blends from the visible color without jumps. Missing artwork or stopped playback restores your chosen palette.
+- **Stops when unnecessary.** Capture and polling are released when disabling, pausing, sleeping, locking or quitting. Reduce Motion suspends both features.
 
-Nota: Música no garantiza portada en emisiones de streaming o radio, y los reproductores remotos (Spotify Connect, navegadores) pueden aportar sonido pero no una portada.
+Note: Music does not guarantee artwork for streaming broadcasts or radio, and remote players (Spotify Connect, browsers) may provide sound without artwork.
 
-## Salvapantallas y pantalla de bloqueo
+## Screensaver and lock screen
 
-La app incluye una **extensión de Wallpaper** para ofrecer Matriz en **Ajustes del Sistema → Fondo de pantalla**, tanto para el escritorio como para el bloqueo y el salvapantallas del sistema. Usa el shader Metal original y recibe una copia de tus ajustes visuales. La selección del fondo del sistema persiste aunque cierres Matriz.
+The app includes a **Wallpaper extension** that offers Matriz in **System Settings → Wallpaper** for the desktop, lock screen and system screensaver. It uses the original Metal shader and receives a copy of your visual settings. The system wallpaper selection persists after quitting Matriz.
 
-El módulo independiente `Matriz.saver` sigue disponible y comparte las preferencias de apariencia. La música y las carátulas se procesan únicamente en la app de escritorio.
+The standalone `Matriz.saver` module remains available and shares appearance preferences. Music and artwork are processed only in the desktop app.
 
-La extensión utiliza interfaces privadas de `WallpaperExtensionKit`: una actualización de macOS puede exigir adaptaciones. No cambia contraseñas ni FileVault. Consulta la [guía de Wallpaper y bloqueo](docs/wallpaper-extension.md) y la [guía de agentes y sus fuentes oficiales](integrations/README.md).
+The extension uses private `WallpaperExtensionKit` interfaces: macOS updates may require adaptations. It does not change passwords or FileVault. See the [Wallpaper and locking guide](docs/wallpaper-extension.md) and the [agent guide and its official sources](integrations/README.md).
 
-## Rendimiento
+## Performance
 
-- Una sola pasada de dibujo, sin texturas de ruido ni recursos externos, con un pipeline SDR.
-- Un dispositivo, una cola y un pipeline Metal compartidos por todas las pantallas.
-- Paletas y parámetros estáticos preparados en CPU al cambiar ajustes; las máscaras se omiten cuando su opacidad es cero.
-- **Ahorro:** 30 FPS y escala 1×. **Equilibrado:** 60 FPS y 1,5×. **Máxima:** 60 FPS y 2×. La escala nunca supera la de tu pantalla y el modo de bajo consumo fuerza Ahorro.
-- El reloj y las fases están acotados para evitar saltos al cambiar la velocidad, pausar o recrear pantallas.
+- One rendering pass, without noise textures or external assets, using an SDR pipeline.
+- One Metal device, queue and pipeline shared across all displays.
+- Palettes and static parameters prepared on the CPU when settings change; masks are skipped when opacity is zero.
+- **Energy Saving:** 30 FPS and 1× scale. **Balanced:** 60 FPS and 1.5×. **Maximum:** 60 FPS and 2×. Scale never exceeds your display's scale, and Low Power Mode forces Energy Saving.
+- Bounded clock and phases prevent jumps when changing speed, pausing or recreating displays.
 
-Estas cifras describen el perfil de trabajo, no una garantía de cadencia para todas las GPU.
+These figures describe the workload profile, not a frame-rate guarantee for every GPU.
 
-## Privacidad
+## Privacy
 
-- El audio **nunca se graba ni se transmite**; solo se analiza su energía y su reparto de frecuencias en memoria.
-- No se guardan portadas, títulos ni audio.
-- No hay cuentas, inicio de sesión, telemetría ni analítica.
-- Los únicos permisos posibles (grabación de audio del sistema y automatización de reproductores) se solicitan solo cuando pulsas su botón correspondiente, y puedes revocarlos en **Privacidad y seguridad**.
+- Audio is **never recorded or transmitted**; only its energy and frequency distribution are analyzed in memory.
+- No artwork, titles or audio are saved.
+- No accounts, sign-in, telemetry or analytics.
+- Potential permissions (system audio recording and player automation) are requested only when you press the corresponding button, and can be revoked in **Privacy & Security**.
 
-## Preguntas frecuentes
+## Frequently asked questions
 
-**¿Matriz graba el micrófono o el sonido del Mac?**
-No. Analiza la salida de audio del sistema con las API de captura de macOS, en memoria y sin conservar nada. Nunca enciende el micrófono.
+**Does Matriz record the microphone or Mac audio?**
+No. It analyzes system audio output through macOS capture APIs in memory without retaining anything. It never turns on the microphone.
 
-**¿Por qué al salir de la app vuelve mi fondo de siempre?**
-La app dibuja una capa que desaparece al salir. Además puedes elegir su extensión como fondo del sistema: esa selección la conserva macOS hasta que elijas otro fondo.
+**Why does my usual wallpaper return when I quit?**
+The app draws a layer that disappears on exit. You can also choose its extension as the system wallpaper; macOS keeps that selection until you choose another wallpaper.
 
-**¿Funciona en un Mac Intel?**
-La release está compilada para Apple Silicon. En Intel puedes compilar el proyecto desde el código fuente; solo necesita las herramientas de Xcode.
+**Does it work on an Intel Mac?**
+The release is built for Apple Silicon. On Intel, build the project from source; it only needs Xcode tools.
 
-**¿Puedo usar solo el salvapantallas?**
-Sí. Instala `Matriz.saver` y selecciónalo en Ajustes del Sistema → Salvapantallas. Los ajustes de apariencia y movimiento se comparten con la app.
+**Can I use just the screensaver?**
+Yes. Install `Matriz.saver` and select it in System Settings → Screen Saver. Appearance and motion settings are shared with the app.
 
-**¿Dónde se guardan mis ajustes?**
-En las preferencias del módulo `com.matriz.screensaver`. El botón Restablecer solo afecta a Matriz; tu fondo y tus ajustes de macOS quedan intactos.
+**Where are my settings saved?**
+In preferences for `com.matriz.screensaver`. Reset affects only Matriz; your wallpaper and macOS settings remain intact.
 
-**¿Hay versión web?**
-El mismo shader funciona en navegadores con WebGL2 como vista de desarrollo (`npm run dev`). La experiencia completa —panel, guardado, audio y salvapantallas— es la app nativa.
+**Is there a web version?**
+Yes. Use the [standalone web component](packages/web/README.md) in WebGL2 browsers, or `npm run dev` for the development preview. The native app provides the full settings panel, persistence, audio and screensaver experience.
 
-**¿Por qué mi app dice que no se puede abrir?**
-Es la cuarentena de Gatekeeper con las apps no notarizadas: ejecuta `xattr -dr com.apple.quarantine Matriz.app Matriz.saver` y ábrela de nuevo.
+**Why does my app say it cannot be opened?**
+Gatekeeper quarantines non-notarized apps: run `xattr -dr com.apple.quarantine Matriz.app Matriz.saver` and open it again.
 
-## Desinstalación
+## Uninstalling
 
-1. Si elegiste la extensión, selecciona otro fondo en Ajustes del Sistema.
-2. Sal de Matriz y elimina los dos bundles instalados:
+1. If you selected the extension, choose another wallpaper in System Settings.
+2. Quit Matriz and remove the two installed bundles:
 
 ```sh
 rm -rf ~/Applications/Matriz.app "$HOME/Library/Screen Savers/Matriz.saver"
 ```
 
-macOS puede conservar los permisos concedidos; revócalos en **Ajustes del Sistema → Privacidad y seguridad** si lo deseas.
+macOS may retain granted permissions; revoke them in **System Settings → Privacy & Security** if desired.
 
-## Desarrollo
+## Development
 
-El proyecto combina una versión web de vista previa (Vite, TypeScript y WebGL2) con la app nativa (AppKit, SwiftUI y Metal). El shader GLSL es la única fuente visual: la versión Metal se genera a partir de él al compilar, de modo que web y app comparten ecuaciones.
+The project combines a web preview (Vite, TypeScript and WebGL2) with the native app (AppKit, SwiftUI and Metal). The GLSL shader is the single visual source: Metal is generated from it during builds so the web and app share equations.
 
-Requiere Node con npm y herramientas de Xcode. La compilación completa y las comprobaciones de la extensión de Wallpaper requieren un SDK de macOS 26 o posterior y un sistema compatible.
+Requires Node with npm and Xcode tools. Full builds and Wallpaper extension checks require a macOS 26 SDK or later and a compatible system.
 
 ```sh
-npm install          # dependencias de desarrollo
-npm run dev          # vista web con el shader en vivo
-npm run build        # compila la web en dist/
-npm test             # pruebas de animación y localización
-npm run macos:build  # compila Matriz.app y Matriz.saver
-npm run macos:check  # verificación Metal completa + capturas de los estilos
-npm run macos:install # instala las compilaciones en tu sesión
+npm install          # development dependencies
+npm run dev          # web preview with the live shader
+npm run build        # build the web into dist/
+npm test             # animation and localization tests
+npm run macos:build  # build Matriz.app and Matriz.saver
+npm run macos:check  # full Metal validation + style screenshots
+npm run macos:install # install the builds in your session
 ```
 
-`macos:check` valida además el catálogo Wallpaper, el contexto remoto y la captura IOSurface. Comprueba el renderizado real, el determinismo, los ajustes, las seis composiciones, las tres geometrías, el desplazamiento al 400 %, la comunicación entre procesos, el DSP y la extracción de color. Además guarda en `~/Library/Application Support/Matriz/Build/` las capturas `Matriz-style-N.png` de cada estilo y `Matriz-styles-preview.png` con el contacto de los seis.
+`macos:check` also validates the Wallpaper catalog, remote context and IOSurface capture. It checks actual rendering, determinism, settings, six compositions, three geometries, 400% displacement, interprocess communication, DSP and color extraction. It saves `Matriz-style-N.png` screenshots for each style and the `Matriz-styles-preview.png` contact sheet in `~/Library/Application Support/Matriz/Build/`.
 
-Estructura:
+Structure:
 
-- `src/` — shader GLSL (`sparkles.frag`), página web y estilos.
-- `macos/` — app, salvapantallas, renderizador Metal, audio, portadas y panel de ajustes.
-- `scripts/` — compilación nativa y localización.
-- `tests/` — pruebas de animación y de los 20 idiomas.
-- `docs/` — imágenes del README y notas de desarrollo.
-- `design/` — fuentes de diseño del icono.
+- `src/` — GLSL shader (`sparkles.frag`), web page and styles.
+- `macos/` — app, screensaver, Metal renderer, audio, artwork and settings panel.
+- `scripts/` — native builds and localization.
+- `tests/` — animation and 20-language tests.
+- `docs/` — README images and development notes.
+- `design/` — icon design sources.
 
-Las 20 localizaciones parten de `macos/Localizable.xcstrings` y se empaquetan como recursos `.lproj` nativos. El icono está en `macos/Assets/Matriz.icon` y se compila con `actool`.
+The 20 localizations originate in `macos/Localizable.xcstrings` and are packaged as native `.lproj` resources. The icon is in `macos/Assets/Matriz.icon` and compiled with `actool`.
 
-## Autor
+## Author
 
-**Jesús Jódar Piernas** — artista 3D, desarrollador y entusiasta de la tecnología.
+**Jesús Jódar Piernas** — 3D artist, developer and technology enthusiast.
 
 [GitHub](https://github.com/jesusjodar) · [Portfolio](https://jesusjodar.github.io) · [LinkedIn](https://linkedin.com/in/jesujopi/) · [X](https://x.com/jesujopi3D) · [Email](mailto:jesusjodarpiernas@gmail.com)
 
-<p align="center">Hecho con ❤️ desde España 🇪🇸</p>
+<p align="center">Made with ❤️ in Spain 🇪🇸</p>
